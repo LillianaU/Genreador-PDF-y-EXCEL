@@ -33,7 +33,7 @@ git clone [url-del-repositorio]
 
 
 
-mi_proyecto/
+c/
 ├── documentos/
 │   ├── templates/
 │   │   └── documentos/
