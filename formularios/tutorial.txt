@@ -47,47 +47,57 @@ INSTALLED_APPS = [
 ]
 
 5. Crear la vista para buscar un documento y generar PDF en documentos/views.py
-from django.shortcuts import render
-from django.http import HttpResponse
-from django.db import connection
-from reportlab.lib.pagesizes import letter
-from reportlab.pdfgen import canvas
 
-def index(request):
-    usuario = None
-    if request.method == 'POST':
-        id_usuario = request.POST.get('id_usuario')
-        with connection.cursor() as cursor:
-            cursor.execute("SELECT * FROM usuarios WHERE id = %s", [id_usuario])
-            columns = [col[0] for col in cursor.description]
-            row = cursor.fetchone()
-            if row:
-                usuario = dict(zip(columns, row))
-    return render(request, 'documentos/index.html', {'usuario': usuario})
+from django.shortcuts import render  # Permite renderizar plantillas HTML
+from django.http import HttpResponse  # Se usa para enviar respuestas HTTP, como PDFs
+from django.db import connection  # Permite interactuar con la base de datos manualmente
+from reportlab.lib.pagesizes import letter  # Define el tamaño de página para el PDF
+from reportlab.pdfgen import canvas  # Permite generar archivos PDF
 
-def generar_pdf(request, id_usuario):
-    with connection.cursor() as cursor:
-        cursor.execute("SELECT * FROM usuarios WHERE id = %s", [id_usuario])
-        columns = [col[0] for col in cursor.description]
-        row = cursor.fetchone()
-        if row:
-            usuario = dict(zip(columns, row))
+def index(request):  # Define la función de vista para la página principal
+    usuario = None  # Inicializa la variable usuario en None
 
-            response = HttpResponse(content_type='application/pdf')
-            response['Content-Disposition'] = f'attachment; filename="usuario_{id_usuario}.pdf"'
+    if request.method == 'POST':  # Verifica si la solicitud es de tipo POST
+        id_usuario = request.POST.get('id_usuario')  # Obtiene el ID del usuario del formulario
+        
+        with connection.cursor() as cursor:  # Abre una conexión con la base de datos
+            cursor.execute("SELECT * FROM usuarios WHERE id = %s", [id_usuario])  # Ejecuta la consulta SQL
+            columns = [col[0] for col in cursor.description]  # Obtiene los nombres de las columnas
+            row = cursor.fetchone()  # Obtiene la primera fila de resultados
+            
+            if row:  # Verifica si se encontró un usuario con el ID proporcionado
+                usuario = dict(zip(columns, row))  # Convierte la fila en un diccionario
 
-            pdf = canvas.Canvas(response, pagesize=letter)
-            pdf.drawString(100, 750, "Información del Usuario")
-            pdf.drawString(100, 730, f"ID: {usuario['id']}")
-            pdf.drawString(100, 710, f"Nombre: {usuario['nombre']}")
-            pdf.drawString(100, 690, f"Correo: {usuario['correo']}")
-            pdf.drawString(100, 670, f"Teléfono: {usuario['telefono']}")
-            pdf.drawString(100, 650, f"Dirección: {usuario['direccion']}")
-            pdf.drawString(100, 630, f"Fecha de Creación: {usuario['fecha_creacion']}")
+    return render(request, 'documentos/index.html', {'usuario': usuario})  
+    # Renderiza la plantilla `index.html` y envía el usuario encontrado
+####################################################################################################3
+def generar_pdf(request, id_usuario):  # Define la función para generar el PDF de un usuario
+    with connection.cursor() as cursor:  # Abre una conexión con la base de datos
+        cursor.execute("SELECT * FROM usuarios WHERE id = %s", [id_usuario])  # Ejecuta la consulta SQL
+        columns = [col[0] for col in cursor.description]  # Obtiene los nombres de las columnas
+        row = cursor.fetchone()  # Obtiene la primera fila de resultados
 
-            pdf.save()
-            return response
-    return HttpResponse("Usuario no encontrado", status=404)
+        if row:  # Verifica si se encontró un usuario
+            usuario = dict(zip(columns, row))  # Convierte la fila en un diccionario
+
+            response = HttpResponse(content_type='application/pdf')  # Crea la respuesta como un archivo PDF
+            response['Content-Disposition'] = f'attachment; filename="usuario_{id_usuario}.pdf"'  
+            # Configura el nombre del archivo para descargar
+
+            pdf = canvas.Canvas(response, pagesize=letter)  # Crea un nuevo documento PDF
+            pdf.drawString(100, 750, "Información del Usuario")  # Escribe un título en el PDF
+            pdf.drawString(100, 730, f"ID: {usuario['id']}")  # Escribe el ID del usuario
+            pdf.drawString(100, 710, f"Nombre: {usuario['nombre']}")  # Escribe el nombre del usuario
+            pdf.drawString(100, 690, f"Correo: {usuario['correo']}")  # Escribe el correo del usuario
+            pdf.drawString(100, 670, f"Teléfono: {usuario['telefono']}")  # Escribe el teléfono del usuario
+            pdf.drawString(100, 650, f"Dirección: {usuario['direccion']}")  # Escribe la dirección del usuario
+            pdf.drawString(100, 630, f"Fecha de Creación: {usuario['fecha_creacion']}")  # Escribe la fecha de creación del usuario
+
+            pdf.save()  # Guarda el PDF
+            return response  # Devuelve el archivo PDF para descarga
+
+    return HttpResponse("Usuario no encontrado", status=404)  # Si no encuentra el usuario, devuelve un error 404
+
 
 6. Configurar las rutas en documentos/urls.py
 
