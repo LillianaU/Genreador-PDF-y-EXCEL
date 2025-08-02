@@ -58,3 +58,5 @@ c/
     ├── urls.py
     └── wsgi.py
 
+pip install -r requirements.txt
+
