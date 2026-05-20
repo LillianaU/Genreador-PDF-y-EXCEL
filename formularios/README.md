@@ -1,5 +1,71 @@
 # Sistema de Generación de PDF y Excel - Django + MySQL
 
+## Descripción del Proyecto
+
+Sistema web desarrollado en Django que permite gestionar usuarios y generar reportes en formato PDF y Excel con gráficos estadísticos (barras y torta).
+
+## Patrones de Diseño Utilizados
+
+### 1. MVC (Model-View-Controller)
+- **Model**: MySQL con tabla de usuarios
+- **View**: Plantillas HTML con Bootstrap local
+- **Controller**: Views de Django
+
+### 2. Patrón de Servicio
+- Lógica de negocio encapsulada en funciones de views
+- Generación de documentos separada del controller
+
+### 3. Factory Method
+- `generar_pdf()` - Factory para crear documentos PDF
+- `generar_excel()` - Factory para crear documentos Excel
+
+### 4. Repository Pattern
+- Acceso a datos mediante `connection.cursor()`
+- Consultas SQL encapsuladas en métodos
+
+## Arquitectura del Proyecto
+
+```
+mi_proyecto/
+├── documentos/
+│   ├── templates/
+│   │   └── documentos/
+│   │       ├── index.html    # Interfaz SPA
+│   │       └── lista.html    # Listado de usuarios
+│   ├── static/
+│   │   ├── css/
+│   │   │   ├── bootstrap.min.css    # Bootstrap local
+│   │   │   ├── sweetalert2.min.css  # SweetAlert2 local
+│   │   │   └── estilos.css          # Estilos personalizados
+│   │   ├── js/
+│   │   │   ├── bootstrap.bundle.min.js
+│   │   │   └── sweetalert2.min.js
+│   │   ├── fonts/
+│   │   │   └── roboto-regular.woff2  # Fuente local
+│   │   └── images/
+│   │       └── logo.svg               # Logo del sistema
+│   ├── views.py    # Controladores con lógica de negocio
+│   ├── urls.py     # Rutas del proyecto
+│   └── apps.py
+└── mi_proyecto/
+    ├── settings.py    # Configuración Django
+    └── urls.py
+```
+
+## Requisitos
+
+- Python 3.12+
+- MySQL 8.0+
+- Django 4.2+
+- ReportLab (para PDF)
+- openpyxl (para Excel)
+
+## Instalación de Dependencias
+
+```bash
+pip install django mysqlclient reportlab openpyxl
+```
+
 ## Script de Base de Datos MySQL
 
 ```sql
@@ -30,14 +96,11 @@ INSERT INTO usuarios (nombre, correo, telefono, direccion) VALUES
 ('Sofia Hernández', 'sofia.hernandez@email.com', '555-333-4444', 'Boulevard Sur 505, Querétaro'),
 ('Diego Rivera', 'diego.riva@email.com', '555-555-6666', 'Avenida Norte 606, Aguascalientes'),
 ('Carmen Díaz', 'carmen.diaz@email.com', '555-777-8888', 'Calle Centro 707, San Luis Potosí');
-
--- Verificar datos
-SELECT * FROM usuarios;
 ```
 
 ## Configuración de Conexión
 
-En `mi_proyecto/mi_proyecto/settings.py`:
+Editar `mi_proyecto/mi_proyecto/settings.py`:
 
 ```python
 DATABASES = {
@@ -52,13 +115,23 @@ DATABASES = {
 }
 ```
 
-## Instalación de Dependencias
+## Archivos Estáticos Locales
 
-```bash
-pip install mysqlclient django reportlab openpyxl
-```
+### Bootstrap 5.3 (Local)
+- `static/css/bootstrap.min.css`
+- `static/js/bootstrap.bundle.min.js`
 
-## Iniciar Servidor
+### SweetAlert2 11.x (Local)
+- `static/css/sweetalert2.min.css`
+- `static/js/sweetalert2.min.js`
+
+### Fuentes Google (Local)
+- `static/fonts/roboto-regular.woff2`
+
+### Logo del Sistema
+- `static/images/logo.svg`
+
+## Ejecutar el Proyecto
 
 ```bash
 cd mi_proyecto
@@ -67,6 +140,73 @@ python manage.py runserver
 
 ## Rutas Disponibles
 
-- **Inicio:** http://127.0.0.1:8000/
-- **PDF:** http://127.0.0.1:8000/generar_pdf/<id>/
-- **Excel:** http://127.0.0.1:8000/generar_excel/<id>/
+| Ruta | Descripción |
+|------|-------------|
+| `/` | Página principal con menú SPA |
+| `/lista/` | Listar todos los usuarios |
+| `/generar_pdf/<id>/` | PDF de usuario específico |
+| `/generar_excel/<id>/` | Excel de usuario específico |
+| `/generar_pdf_todos/` | PDF de todos los usuarios |
+| `/generar_excel_todos/` | Excel de todos los usuarios |
+
+## Características
+
+### PDF con Gráficos
+- **Gráfico de Barras**: Usuarios registrados por mes
+- **Gráfico de Torta**: Distribución por inicial del nombre
+- **Logo**: Imagen del sistema en el encabezado
+- **Estadísticas**: Métricas del sistema
+
+### Excel con Gráficos
+- **Hoja 1**: Datos del usuario
+- **Hoja 2**: Estadísticas del sistema
+- **Hoja 3**: Gráfico de barras (visual)
+- **Hoja 4**: Gráfico de torta (visual)
+
+### Interfaz SPA
+- Menú lateral de navegación
+- Búsqueda de usuario por ID
+- Opciones de informe (PDF/Excel global)
+- Listado de todos los usuarios
+- Diseño moderno con Bootstrap local
+- Notificaciones con SweetAlert2 local
+
+## Tecnologías Utilizadas
+
+| Tecnología | Versión | Propósito |
+|------------|---------|------------|
+| Django | 4.2+ | Framework web |
+| MySQL | 8.0+ | Base de datos |
+| Bootstrap | 5.3 | UI/UX local |
+| SweetAlert2 | 11.x | Alertas local |
+| ReportLab | - | Generación PDF |
+| openpyxl | - | Generación Excel |
+| Roboto | - | Fuente local |
+
+## Estructura de Código
+
+### views.py - Funciones Principales
+
+```python
+def index(request):
+    """Vista principal - Búsqueda de usuarios"""
+
+def generar_pdf(request, id_usuario):
+    """Genera PDF con gráficos de barras y torta"""
+
+def generar_excel(request, id_usuario):
+    """Genera Excel con múltiples hojas y gráficos"""
+
+def generar_pdf_todos(request):
+    """Genera PDF de todos los usuarios"""
+
+def generar_excel_todos(request):
+    """Genera Excel de todos los usuarios"""
+
+def listar_usuarios(request):
+    """Lista todos los usuarios"""
+```
+
+## Licencia
+
+MIT License - 2026

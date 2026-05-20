@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Gestión de Usuarios</title>
+    <title>Sistema de Gestión - PDF y Excel</title>
     
     {% load static %}
     
@@ -11,142 +11,348 @@
     <link rel="stylesheet" href="{% static 'css/sweetalert2.min.css' %}">
     <link rel="stylesheet" href="{% static 'css/estilos.css' %}">
     
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <style>
-        @font-face {
-            font-family: 'Roboto';
-            src: url('{% static "fonts/roboto-regular.woff2" %}') format('woff2');
-            font-weight: 400;
-            font-style: normal;
+        .sidebar {
+            min-height: 100vh;
+            background: linear-gradient(180deg, #1a252f 0%, #2c3e50 100%);
+            box-shadow: 4px 0 15px rgba(0,0,0,0.1);
+        }
+        
+        .nav-link-custom {
+            color: #bdc3c7;
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin: 5px 0;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .nav-link-custom:hover, .nav-link-custom.active {
+            background: rgba(52, 152, 219, 0.2);
+            color: #3498db;
+        }
+        
+        .nav-link-custom i {
+            width: 25px;
+        }
+        
+        .main-content {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .card-spa {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .search-box {
+            position: relative;
+        }
+        
+        .search-box .form-control {
+            border-radius: 50px;
+            padding: 12px 20px 12px 50px;
+            border: 2px solid #e0e0e0;
+            transition: all 0.3s;
+        }
+        
+        .search-box .form-control:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 0 4px rgba(52, 152, 219, 0.1);
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #95a5a6;
+        }
+        
+        .btn-option {
+            border-radius: 12px;
+            padding: 15px 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .btn-option:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        
+        .btn-option.pdf {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+        }
+        
+        .btn-option.excel {
+            background: linear-gradient(135deg, #27ae60 0%, #1e8449 100%);
+            color: white;
+        }
+        
+        .menu-section {
+            display: none;
+        }
+        
+        .menu-section.active {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .user-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            padding: 20px;
+            color: white;
+            margin-bottom: 20px;
+        }
+        
+        .user-card .avatar {
+            width: 60px;
+            height: 60px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: #667eea;
+            font-weight: bold;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .stat-item {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        
+        .stat-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .stat-icon {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #7f8c8d;
+        }
+        
+        .table-section {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .table-user {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .table-user thead {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+        }
+        
+        .table-user tbody tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .table-user .btn-sm {
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+        
+        .dropdown-menu-custom {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            border: none;
+            padding: 10px;
+        }
+        
+        .dropdown-item-custom {
+            border-radius: 8px;
+            padding: 10px 15px;
+            transition: all 0.2s;
+        }
+        
+        .dropdown-item-custom:hover {
+            background: #3498db;
+            color: white;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-8">
-                <div class="card-custom">
-                    <div class="card-header-custom">
-                        <div class="logo-container">
-                            <svg width="60" height="60" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z" fill="#3498db"/>
-                            </svg>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-2 sidebar p-3">
+                <div class="text-center mb-4">
+                    <div class="avatar mx-auto mb-3">SG</div>
+                    <h5 class="text-white">Sistema de Gestión</h5>
+                    <p class="text-muted small">PDF y Excel</p>
+                </div>
+                
+                <nav class="nav flex-column">
+                    <div class="nav-link-custom active" onclick="showSection('buscar')">
+                        <i class="fas fa-search"></i> Buscar Usuario
+                    </div>
+                    <div class="nav-link-custom" onclick="showSection('opciones')">
+                        <i class="fas fa-file-alt"></i> Opciones de Informe
+                    </div>
+                    <div class="nav-link-custom" onclick="showSection('listar')">
+                        <i class="fas fa-users"></i> Listar Todos
+                    </div>
+                </nav>
+                
+                <div class="mt-4 p-3" style="background: rgba(255,255,255,0.1); border-radius: 10px;">
+                    <small class="text-white-50">Django + MySQL</small>
+                </div>
+            </div>
+            
+            <!-- Main Content -->
+            <div class="col-md-10 main-content">
+                <div class="card-spa">
+                    <!-- Header -->
+                    <div class="card-header bg-white p-4 border-0">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h3 class="mb-0" id="sectionTitle">Buscar Usuario</h3>
+                                <p class="text-muted mb-0" id="sectionSubtitle">Ingrese el ID del usuario para generar informes</p>
+                            </div>
+                            <div class="text-end">
+                                <span class="badge bg-primary fs-6">v1.0</span>
+                            </div>
                         </div>
-                        <h2 class="mb-0">Gestión de Usuarios</h2>
-                        <p class="mb-0 opacity-75">Generador de PDF y Excel con Estadísticas</p>
                     </div>
                     
+                    <!-- Content -->
                     <div class="card-body p-4">
-                        <form id="buscarForm" method="POST" class="mb-4">
-                            {% csrf_token %}
-                            <div class="input-group">
-                                <input type="number" name="id_usuario" id="id_usuario" 
-                                       class="form-control form-control-custom" 
-                                       placeholder="Ingrese el ID del usuario" required
-                                       min="1">
-                                <button type="submit" class="btn btn-primary-custom">
-                                    <i class="fas fa-search"></i> Buscar
-                                </button>
-                            </div>
-                        </form>
                         
-                        <div id="loading" class="loading-spinner" style="display: none;"></div>
-                        
-                        {% if usuario %}
-                        <div id="resultado" class="fade-in">
-                            <div class="alert alert-success alert-custom">
-                                <i class="fas fa-check-circle"></i> Usuario encontrado exitosamente
+                        <!-- Section: Buscar -->
+                        <div id="section-buscar" class="menu-section active">
+                            <div class="search-box mb-4">
+                                <i class="fas fa-search search-icon"></i>
+                                <input type="number" id="buscarId" class="form-control" placeholder="Ingrese ID de usuario (ej: 1, 2, 3...)" min="1">
                             </div>
                             
-                            <div class="row mb-4">
-                                <div class="col-md-4">
-                                    <div class="stats-card">
-                                        <div class="stats-icon">👤</div>
-                                        <div class="stats-number">{{ usuario.id }}</div>
-                                        <div class="stats-label">ID de Usuario</div>
+                            <div class="text-center mb-4">
+                                <button class="btn btn-primary btn-lg px-5" onclick="buscarUsuario()">
+                                    <i class="fas fa-search me-2"></i> Buscar
+                                </button>
+                            </div>
+                            
+                            <div id="resultadoBusqueda"></div>
+                        </div>
+                        
+                        <!-- Section: Opciones -->
+                        <div id="section-opciones" class="menu-section">
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                Seleccione el tipo de informe que desea generar para todos los usuarios
+                            </div>
+                            
+                            <div class="row g-4">
+                                <div class="col-md-6">
+                                    <div class="card h-100 border-0 shadow-sm">
+                                        <div class="card-body text-center py-5">
+                                            <i class="fas fa-file-pdf fa-4x text-danger mb-4"></i>
+                                            <h4>Generar PDF</h4>
+                                            <p class="text-muted">Exportar todos los usuarios a documento PDF con gráficos estadísticos</p>
+                                            <button class="btn btn-option pdf" onclick="generarPDFTodos()">
+                                                <i class="fas fa-download me-2"></i> Descargar PDF
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="col-md-4">
-                                    <div class="stats-card">
-                                        <div class="stats-icon">📧</div>
-                                        <div class="stats-number">1</div>
-                                        <div class="stats-label">Correo Registrado</div>
+                                <div class="col-md-6">
+                                    <div class="card h-100 border-0 shadow-sm">
+                                        <div class="card-body text-center py-5">
+                                            <i class="fas fa-file-excel fa-4x text-success mb-4"></i>
+                                            <h4>Generar Excel</h4>
+                                            <p class="text-muted">Exportar todos los usuarios a hoja de cálculo con gráficos</p>
+                                            <button class="btn btn-option excel" onclick="generarExcelTodos()">
+                                                <i class="fas fa-download me-2"></i> Descargar Excel
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="col-md-4">
-                                    <div class="stats-card">
-                                        <div class="stats-icon">📅</div>
-                                        <div class="stats-number">1</div>
-                                        <div class="stats-label">Registro Activo</div>
-                                    </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Section: Listar -->
+                        <div id="section-listar" class="menu-section">
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <h5 class="mb-0">Listado de Todos los Usuarios</h5>
+                                <div>
+                                    <button class="btn btn-danger btn-sm me-2" onclick="generarPDFTodos()">
+                                        <i class="fas fa-file-pdf me-1"></i> PDF
+                                    </button>
+                                    <button class="btn btn-success btn-sm" onclick="generarExcelTodos()">
+                                        <i class="fas fa-file-excel me-1"></i> Excel
+                                    </button>
                                 </div>
                             </div>
                             
                             <div class="table-responsive">
-                                <table class="table table-custom table-bordered">
+                                <table class="table table-user table-hover">
                                     <thead>
                                         <tr>
-                                            <th colspan="2" class="text-center">Datos del Usuario</th>
+                                            <th>ID</th>
+                                            <th>Nombre</th>
+                                            <th>Correo</th>
+                                            <th>Teléfono</th>
+                                            <th>Dirección</th>
+                                            <th>Fecha</th>
+                                            <th>Acciones</th>
                                         </tr>
                                     </thead>
-                                    <tbody>
+                                    <tbody id="tablaUsuarios">
                                         <tr>
-                                            <td><strong>ID</strong></td>
-                                            <td>{{ usuario.id }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td><strong>Nombre</strong></td>
-                                            <td>{{ usuario.nombre }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td><strong>Correo</strong></td>
-                                            <td>{{ usuario.correo }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td><strong>Teléfono</strong></td>
-                                            <td>{{ usuario.telefono }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td><strong>Dirección</strong></td>
-                                            <td>{{ usuario.direccion }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td><strong>Fecha de Creación</strong></td>
-                                            <td>{{ usuario.fecha_creacion }}</td>
+                                            <td colspan="7" class="text-center py-5">
+                                                <div class="spinner-border text-primary" role="status">
+                                                    <span class="visually-hidden">Cargando...</span>
+                                                </div>
+                                                <p class="mt-2 text-muted">Cargando usuarios...</p>
+                                            </td>
                                         </tr>
                                     </tbody>
                                 </table>
                             </div>
-                            
-                            <div class="btn-group d-flex flex-wrap gap-2 mt-3">
-                                <a href="{% url 'generar_pdf' usuario.id %}" 
-                                   class="btn btn-success-custom flex-fill"
-                                   onclick="mostrarSweetAlert('pdf')">
-                                    <i class="fas fa-file-pdf"></i> Descargar PDF
-                                </a>
-                                <a href="{% url 'generar_excel' usuario.id %}" 
-                                   class="btn btn-primary-custom flex-fill"
-                                   onclick="mostrarSweetAlert('excel')">
-                                    <i class="fas fa-file-excel"></i> Descargar Excel
-                                </a>
-                            </div>
                         </div>
-                        {% endif %}
                         
-                        {% if error %}
-                        <div class="alert alert-danger alert-custom fade-in">
-                            <i class="fas fa-exclamation-triangle"></i> {{ error }}
-                        </div>
-                        {% endif %}
-                    </div>
-                    
-                    <div class="footer-custom">
-                        <p class="mb-0">
-                            <i class="fas fa-database"></i> Sistema Django + MySQL
-                            <span class="mx-2">|</span>
-                            <i class="fas fa-chart-bar"></i> Estadísticas en PDF y Excel
-                        </p>
                     </div>
                 </div>
             </div>
@@ -156,44 +362,233 @@
     <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
     <script src="{% static 'js/sweetalert2.min.js' %}"></script>
     <script>
-        function mostrarSweetAlert(tipo) {
-            const titulo = tipo === 'pdf' ? 'Generando PDF...' : 'Generando Excel...';
-            const mensaje = tipo === 'pdf' 
-                ? 'El documento PDF con estadísticas está siendo generado' 
-                : 'El documento Excel con estadísticas está siendo generado';
+        let usuarioActual = null;
+        
+        function showSection(section) {
+            document.querySelectorAll('.menu-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-link-custom').forEach(n => n.classList.remove('active'));
+            
+            document.getElementById('section-' + section).classList.add('active');
+            event.target.closest('.nav-link-custom').classList.add('active');
+            
+            const titles = {
+                'buscar': ['Buscar Usuario', 'Ingrese el ID del usuario para generar informes'],
+                'opciones': ['Opciones de Informe', 'Genere informes en PDF o Excel de todos los usuarios'],
+                'listar': ['Listar Todos los Usuarios', 'Visualice y exporte todos los usuarios registrados']
+            };
+            
+            document.getElementById('sectionTitle').textContent = titles[section][0];
+            document.getElementById('sectionSubtitle').textContent = titles[section][1];
+            
+            if (section === 'listar') {
+                cargarUsuarios();
+            }
+        }
+        
+        function buscarUsuario() {
+            const id = document.getElementById('buscarId').value;
+            
+            if (!id || id < 1) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Por favor ingrese un ID válido',
+                    confirmButtonColor: '#3498db'
+                });
+                return;
+            }
+            
+            fetch('{% url "index" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: 'id_usuario=' + id
+            })
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const usuario = doc.querySelector('#resultado');
+                const error = doc.querySelector('.alert-danger');
+                
+                if (usuario) {
+                    const idMatch = usuario.querySelector('td:nth-child(2)');
+                    const nombreMatch = usuario.querySelector('tr:nth-child(2) td:nth-child(2)');
+                    const correoMatch = usuario.querySelector('tr:nth-child(3) td:nth-child(2)');
+                    const telefonoMatch = usuario.querySelector('tr:nth-child(4) td:nth-child(2)');
+                    const direccionMatch = usuario.querySelector('tr:nth-child(5) td:nth-child(2)');
+                    const fechaMatch = usuario.querySelector('tr:nth-child(6) td:nth-child(2)');
+                    
+                    if (idMatch) {
+                        usuarioActual = {
+                            id: idMatch.textContent,
+                            nombre: nombreMatch ? nombreMatch.textContent : '',
+                            correo: correoMatch ? correoMatch.textContent : '',
+                            telefono: telefonoMatch ? telefonoMatch.textContent : '',
+                            direccion: direccionMatch ? direccionMatch.textContent : '',
+                            fecha: fechaMatch ? fechaMatch.textContent : ''
+                        };
+                        mostrarUsuario(usuarioActual);
+                    } else {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Usuario no encontrado',
+                            text: 'No existe un usuario con el ID proporcionado',
+                            confirmButtonColor: '#e74c3c'
+                        });
+                    }
+                } else if (error) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Usuario no encontrado',
+                        text: 'No existe un usuario con el ID proporcionado',
+                        confirmButtonColor: '#e74c3c'
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Ocurrió un error al buscar el usuario',
+                    confirmButtonColor: '#e74c3c'
+                });
+            });
+        }
+        
+        function mostrarUsuario(usuario) {
+            const inicial = usuario.nombre.charAt(0).toUpperCase();
+            
+            document.getElementById('resultadoBusqueda').innerHTML = `
+                <div class="fade-in">
+                    <div class="user-card">
+                        <div class="d-flex align-items-center">
+                            <div class="avatar me-3">${inicial}</div>
+                            <div>
+                                <h4 class="mb-0">${usuario.nombre}</h4>
+                                <small>ID: ${usuario.id}</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-icon">📧</div>
+                            <div class="stat-value">1</div>
+                            <div class="stat-label">Correo</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-icon">📅</div>
+                            <div class="stat-value">1</div>
+                            <div class="stat-label">Registro</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-icon">📍</div>
+                            <div class="stat-value">${usuario.direccion !== 'N/A' ? '1' : '0'}</div>
+                            <div class="stat-label">Dirección</div>
+                        </div>
+                    </div>
+                    
+                    <div class="table-section">
+                        <h6 class="mb-3">Datos del Usuario</h6>
+                        <table class="table table-bordered">
+                            <tr><td><strong>Nombre</strong></td><td>${usuario.nombre}</td></tr>
+                            <tr><td><strong>Correo</strong></td><td>${usuario.correo}</td></tr>
+                            <tr><td><strong>Teléfono</strong></td><td>${usuario.telefono}</td></tr>
+                            <tr><td><strong>Dirección</strong></td><td>${usuario.direccion}</td></tr>
+                            <tr><td><strong>Fecha</strong></td><td>${usuario.fecha}</td></tr>
+                        </table>
+                        
+                        <div class="d-flex gap-3 mt-4">
+                            <button class="btn btn-option pdf flex-fill" onclick="descargarPDF(${usuario.id})">
+                                <i class="fas fa-file-pdf me-2"></i> Descargar PDF
+                            </button>
+                            <button class="btn btn-option excel flex-fill" onclick="descargarExcel(${usuario.id})">
+                                <i class="fas fa-file-excel me-2"></i> Descargar Excel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
             
             Swal.fire({
-                title: titulo,
-                html: mensaje,
+                icon: 'success',
+                title: 'Usuario encontrado',
+                text: `${usuario.nombre} - ID: ${usuario.id}`,
+                confirmButtonColor: '#3498db',
+                timer: 2000
+            });
+        }
+        
+        function descargarPDF(id) {
+            Swal.fire({
+                title: 'Generando PDF',
+                html: 'El documento PDF está siendo generado...',
                 timer: 2000,
                 timerProgressBar: true,
-                didOpen: () => {
-                    Swal.showLoading()
+                didOpen: () => { Swal.showLoading(); }
+            }).then(() => {
+                window.location.href = '/generar_pdf/' + id + '/';
+            });
+        }
+        
+        function descargarExcel(id) {
+            Swal.fire({
+                title: 'Generando Excel',
+                html: 'El documento Excel está siendo generado...',
+                timer: 2000,
+                timerProgressBar: true,
+                didOpen: () => { Swal.showLoading(); }
+            }).then(() => {
+                window.location.href = '/generar_excel/' + id + '/';
+            });
+        }
+        
+        function generarPDFTodos() {
+            Swal.fire({
+                title: 'Generando PDF',
+                html: 'Generando reporte de todos los usuarios...',
+                timer: 2500,
+                timerProgressBar: true,
+                didOpen: () => { Swal.showLoading(); }
+            }).then(() => {
+                window.location.href = '{% url "generar_pdf_todos" %}';
+            });
+        }
+        
+        function generarExcelTodos() {
+            Swal.fire({
+                title: 'Generando Excel',
+                html: 'Generando reporte de todos los usuarios...',
+                timer: 2500,
+                timerProgressBar: true,
+                didOpen: () => { Swal.showLoading(); }
+            }).then(() => {
+                window.location.href = '{% url "generar_excel_todos" %}';
+            });
+        }
+        
+        function cargarUsuarios() {
+            fetch('{% url "lista_usuarios" %}')
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const tbody = doc.querySelector('tbody');
+                if (tbody) {
+                    document.getElementById('tablaUsuarios').innerHTML = tbody.innerHTML;
                 }
             });
         }
         
-        document.getElementById('buscarForm').addEventListener('submit', function(e) {
-            const id = document.getElementById('id_usuario').value;
-            if (!id || id < 1) {
-                e.preventDefault();
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'Por favor ingrese un ID de usuario válido',
-                    confirmButtonColor: '#3498db'
-                });
+        document.getElementById('buscarId').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                buscarUsuario();
             }
         });
-        
-        {% if error %}
-        Swal.fire({
-            icon: 'error',
-            title: 'Usuario no encontrado',
-            text: 'No existe un usuario con el ID proporcionado',
-            confirmButtonColor: '#e74c3c'
-        });
-        {% endif %}
     </script>
 </body>
 </html>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <circle cx="100" cy="100" r="90" fill="url(#bgGradient)"/>
+  <circle cx="100" cy="100" r="75" fill="white"/>
+  <path d="M70 80 L100 50 L130 80 L130 130 L100 160 L70 130 Z" fill="#667eea"/>
+  <rect x="95" y="60" width="10" height="80" fill="white"/>
+  <rect x="70" y="95" width="60" height="10" fill="white"/>
+  <circle cx="85" cy="75" r="8" fill="white"/>
+  <circle cx="115" cy="75" r="8" fill="white"/>
+  <text x="100" y="175" font-family="Arial" font-size="14" fill="white" text-anchor="middle">SG</text>
+</svg>

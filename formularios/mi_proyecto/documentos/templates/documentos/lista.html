@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Listado de Usuarios</title>
+    
+    {% load static %}
+    
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/estilos.css' %}">
+    
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .card-custom {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+        }
+        .table-users {
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .table-users thead {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+        }
+        .table-users tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <a href="{% url 'index' %}" class="btn btn-primary">
+                    <i class="fas fa-arrow-left me-2"></i> Volver al Inicio
+                </a>
+            </div>
+            <div class="col-md-6 text-end">
+                <a href="{% url 'generar_pdf_todos' %}" class="btn btn-danger">
+                    <i class="fas fa-file-pdf me-2"></i> PDF
+                </a>
+                <a href="{% url 'generar_excel_todos' %}" class="btn btn-success">
+                    <i class="fas fa-file-excel me-2"></i> Excel
+                </a>
+            </div>
+        </div>
+        
+        <div class="card-custom p-4">
+            <div class="text-center mb-4">
+                <h2>Listado de Todos los Usuarios</h2>
+                <p class="text-muted">Total: {{ usuarios|length }} usuarios registrados</p>
+            </div>
+            
+            <div class="table-responsive">
+                <table class="table table-users table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Correo</th>
+                            <th>Teléfono</th>
+                            <th>Dirección</th>
+                            <th>Fecha Creación</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for usuario in usuarios %}
+                        <tr>
+                            <td>{{ usuario.id }}</td>
+                            <td>{{ usuario.nombre }}</td>
+                            <td>{{ usuario.correo }}</td>
+                            <td>{{ usuario.telefono|default:"N/A" }}</td>
+                            <td>{{ usuario.direccion|default:"N/A" }}</td>
+                            <td>{{ usuario.fecha_creacion|date:"Y-m-d" }}</td>
+                            <td>
+                                <a href="{% url 'generar_pdf' usuario.id %}" class="btn btn-sm btn-danger">
+                                    <i class="fas fa-file-pdf"></i>
+                                </a>
+                                <a href="{% url 'generar_excel' usuario.id %}" class="btn btn-sm btn-success">
+                                    <i class="fas fa-file-excel"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center py-5">
+                                <h5>No hay usuarios registrados</h5>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
