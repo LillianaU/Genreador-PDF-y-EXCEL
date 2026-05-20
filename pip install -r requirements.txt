@@ -1,0 +1,4 @@
+Django==5.1
+reportlab
+openpyxl
+mysqlclient
