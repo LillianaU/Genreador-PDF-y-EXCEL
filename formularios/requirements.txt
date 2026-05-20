@@ -1,29 +1,35 @@
 # ==========================================
 # REQUERIMIENTOS DEL PROYECTO
 # Sistema de Generación de PDF y Excel
+# Django ORM + MySQL
 # ==========================================
 
-# Framework Web
+# ==========================================
+# CORE - Framework y Base de Datos
+# ==========================================
 Django==4.2.28
-
-# Base de Datos
 mysqlclient==2.2.4
 
-# Generación de PDF
-reportlab==4.2.5
-
-# Generación de Excel
-openpyxl==3.1.5
-
-# Procesamiento de imágenes (para logo)
-Pillow==10.4.0
+# ==========================================
+# GENERACIÓN DE DOCUMENTOS
+# ==========================================
+reportlab==4.2.5          # PDF
+openpyxl==3.1.5          # Excel
+Pillow==10.4.0           # Imágenes (logo)
 
 # ==========================================
-# PARA DESARROLLO (opcional)
+# DESARROLLO Y PRUEBAS
 # ==========================================
-# django-debug-toolbar==4.4.6
-# pytest==8.3.3
-# pytest-django==4.9.0
+pytest==8.3.3            # Framework de pruebas
+pytest-django==4.9.0     # Plugin Django para pytest
+pytest-cov==4.1.0        # Coverage de pruebas
+
+# ==========================================
+# OPCIONALES
+# ==========================================
+# django-debug-toolbar==4.4.6  # Debug en desarrollo
+# black==24.8.0                 # Formateador de código
+# flake8==7.1.1                 # Linter
 
 # ==========================================
 # INSTALACIÓN
@@ -31,5 +37,13 @@ Pillow==10.4.0
 # pip install -r requirements.txt
 #
 # En Windows puede requerir Visual C++ Build Tools
-# para mysqlclient
+# para mysqlclient: https://aka.ms/vs/17/release/vs_buildtools.exe
 # ==========================================
+
+# ==========================================
+# VERIFICAR INSTALACIÓN
+# ==========================================
+# python -c "import django; print(django.__version__)"
+# python -c "import reportlab; print(reportlab.__version__)"
+# python -c "import openpyxl; print(openpyxl.__version__)"
+# python -c "import PIL; print(PIL.__version__)"

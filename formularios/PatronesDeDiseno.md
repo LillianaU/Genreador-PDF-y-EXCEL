@@ -1,12 +1,12 @@
 # Documentación de Patrones de Diseño
 
-## Sistema de Generación de PDF y Excel - Django + MySQL
+## Sistema de Generación de PDF y Excel - Django ORM + MySQL
 
 ---
 
 ## 1. Introducción
 
-Este documento describe los patrones de diseño utilizados en el proyecto, implementados en Python/Django para la generación de informes PDF y Excel con gráficos estadísticos.
+Este documento describe los patrones de diseño utilizados en el proyecto, implementados en **Python/Django ORM** para la generación de informes PDF y Excel con gráficos estadísticos.
 
 ---
 
@@ -14,7 +14,7 @@ Este documento describe los patrones de diseño utilizados en el proyecto, imple
 
 ### 2.1 MVC (Model-View-Controller)
 
-**Descripción**: Patrón implementado por Django naturalmente.
+**Descripción**: Patrón implementado por Django naturalmente con Django ORM.
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -23,11 +23,11 @@ Este documento describe los patrones de diseño utilizados en el proyecto, imple
 │                                                             │
 │   MODEL (Model)              VIEW (Template)                │
 │   ┌─────────────┐            ┌─────────────────┐          │
-│   │   MySQL     │            │    HTML/CSS     │          │
-│   │  usuarios   │            │   Bootstrap     │          │
+│   │  models.py  │            │    HTML/CSS     │          │
+│   │  Usuario    │            │   Bootstrap     │          │
 │   └─────────────┘            └─────────────────┘          │
 │         ↑                          ↑                       │
-│         │    connection.cursor()   │  render()           │
+│         │    Usuario.objects       │  render()           │
 │         └──────────────────────────┘                       │
 │                          ↓                                  │
 │                   CONTROLLER                              │
@@ -39,18 +39,19 @@ Este documento describe los patrones de diseño utilizados en el proyecto, imple
 └─────────────────────────────────────────────────────────────┘
 ```
 
-**Implementación**:
+**Implementación con Django ORM**:
 ```python
-# MODEL - Acceso a datos MySQL
-with connection.cursor() as cursor:
-    cursor.execute("SELECT * FROM usuarios WHERE id = %s", [id_usuario])
+# MODEL - models.py
+class Usuario(models.Model):
+    nombre = models.CharField(max_length=100)
+    correo = models.EmailField(unique=True)
+
+# CONTROLADOR - Acceso a datos con ORM
+usuario = Usuario.objects.get(id=id_usuario)
+usuarios = Usuario.objects.filter(nombre__icontains=nombre)
 
 # VIEW - Renderizado de plantillas
 return render(request, 'documentos/index.html', {'usuario': usuario})
-
-# CONTROLLER - Lógica de negocio
-def generar_pdf(request, id_usuario):
-    # Procesamiento y generación de PDF
 ```
 
 ---
@@ -106,44 +107,38 @@ def generar_excel(request, id_usuario):
 
 ### 2.3 Repository Pattern (Patrón Repositorio)
 
-**Descripción**: Abstrae el acceso a datos, centralizando consultas SQL.
+**Descripción**: Abstrae el acceso a datos mediante Django ORM.
 
 ```
 ┌─────────────────────────────────────────────┐
-│           REPOSITORY PATTERN                │
+│           REPOSITORY PATTERN (Django ORM)   │
 ├─────────────────────────────────────────────┤
 │                                             │
-│   View ──────► Repository ──────► MySQL   │
+│   View ──────► ORM ──────► MySQL           │
 │                     │                       │
 │         ┌──────────┼──────────┐            │
 │         │          │          │            │
-│    get_by_id() get_all() get_stats()      │
+│    .get()   .filter()  .count()           │
 │                                             │
 └─────────────────────────────────────────────┘
 ```
 
-**Implementación**:
+**Implementación con Django ORM**:
 ```python
-class UsuarioRepository:
-    """Repositório de usuarios - funciones en views.py"""
-    
-    @staticmethod
-    def get_by_id(id_usuario):
-        with connection.cursor() as cursor:
-            cursor.execute("SELECT * FROM usuarios WHERE id = %s", [id_usuario])
-            return cursor.fetchone()
-    
-    @staticmethod
-    def get_all():
-        with connection.cursor() as cursor:
-            cursor.execute("SELECT * FROM usuarios ORDER BY id")
-            return cursor.fetchall()
-    
-    @staticmethod
-    def get_stats():
-        with connection.cursor() as cursor:
-            cursor.execute("SELECT COUNT(*) FROM usuarios")
-            return cursor.fetchone()
+# Django ORM como Repository
+from documentos.models import Usuario
+
+# get_by_id()
+usuario = Usuario.objects.get(id=id_usuario)
+
+# get_all()
+usuarios = Usuario.objects.all()
+
+# get_stats()
+total = Usuario.objects.count()
+
+# filter() con condiciones
+usuarios = Usuario.objects.filter(nombre__icontains='Juan')
 ```
 
 ---
