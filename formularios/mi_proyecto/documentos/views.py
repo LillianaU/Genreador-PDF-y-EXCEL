@@ -52,6 +52,7 @@ def index(request):
     """
     Vista principal que maneja la búsqueda de usuarios y muestra sus datos.
     Implementa el patrón MVC de Django.
+    Soporta búsqueda por ID o por nombre.
     
     Args:
         request: Objeto HttpRequest que contiene los datos de la petición
@@ -60,7 +61,10 @@ def index(request):
         HttpResponse: Renderiza la plantilla index.html con los datos del usuario
     """
     usuario = None
+    usuarios_encontrados = None
+    
     if request.method == 'POST':
+        # Buscar por ID
         id_usuario = request.POST.get('id_usuario')
         if id_usuario:
             with connection.cursor() as cursor:
@@ -71,9 +75,24 @@ def index(request):
                     usuario = dict(zip(columns, row))
                     return render(request, 'documentos/index.html', {'usuario': usuario})
                 else:
-                    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                        return JsonResponse({'error': 'Usuario no encontrado'}, status=404)
                     return render(request, 'documentos/index.html', {'error': 'Usuario no encontrado'})
+        
+        # Buscar por nombre
+        nombre_busqueda = request.POST.get('nombre_busqueda')
+        if nombre_busqueda:
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT * FROM usuarios WHERE nombre LIKE %s", [f'%{nombre_busqueda}%'])
+                columns = [col[0] for col in cursor.description]
+                rows = cursor.fetchall()
+                if rows:
+                    usuarios_encontrados = [dict(zip(columns, row)) for row in rows]
+                    if len(usuarios_encontrados) == 1:
+                        usuario = usuarios_encontrados[0]
+                        return render(request, 'documentos/index.html', {'usuario': usuario})
+                    else:
+                        return render(request, 'documentos/index.html', {'usuarios_encontrados': usuarios_encontrados, 'busqueda_nombre': nombre_busqueda})
+                else:
+                    return render(request, 'documentos/index.html', {'error': 'No se encontraron usuarios con ese nombre'})
     
     return render(request, 'documentos/index.html', {'usuario': usuario})
 
@@ -169,15 +188,16 @@ def generar_pdf(request, id_usuario):
                 spaceAfter=10
             )
 
-            # Logo
-            logo_path = os.path.join(settings.BASE_DIR, 'documentos', 'static', 'images', 'logo.svg')
+            # Logo - solo PNG/JPEG
+            logo_path = os.path.join(settings.BASE_DIR, 'documentos', 'static', 'images', 'logo.png')
             if os.path.exists(logo_path):
                 try:
-                    img = Image(logo_path, width=1.5*inch, height=1.5*inch)
+                    img = Image(logo_path, width=1*inch, height=1*inch)
                     img.hAlign = 'CENTER'
                     elements.append(img)
-                except:
-                    pass
+                    elements.append(Spacer(1, 10))
+                except Exception as e:
+                    print(f"Error con logo: {e}")
 
             elements.append(Paragraph("INFORME DETALLADO DE USUARIO", title_style))
             elements.append(Paragraph(f"Fecha de generación: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}", subtitle_style))
@@ -368,15 +388,15 @@ def generar_pdf_todos(request):
     subtitle_style = ParagraphStyle('SubTitle', parent=styles['Normal'], alignment=1, fontSize=12, textColor=colors.HexColor('#7f8c8d'), spaceAfter=20)
     section_style = ParagraphStyle('SectionTitle', parent=styles['Heading2'], fontSize=14, textColor=colors.HexColor('#3498db'), spaceBefore=15, spaceAfter=10)
 
-    # Logo
-    logo_path = os.path.join(settings.BASE_DIR, 'documentos', 'static', 'images', 'logo.svg')
+    # Logo - solo PNG/JPEG
+    logo_path = os.path.join(settings.BASE_DIR, 'documentos', 'static', 'images', 'logo.png')
     if os.path.exists(logo_path):
         try:
-            img = Image(logo_path, width=1*inch, height=1*inch)
+            img = Image(logo_path, width=0.8*inch, height=0.8*inch)
             img.hAlign = 'CENTER'
             elements.append(img)
-        except:
-            pass
+        except Exception as e:
+            print(f"Error con logo: {e}")
 
     elements.append(Paragraph("REPORTE GENERAL DE USUARIOS", title_style))
     elements.append(Paragraph(f"Fecha: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | Total: {total} usuarios", subtitle_style))

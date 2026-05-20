@@ -263,16 +263,81 @@
                         
                         <!-- Section: Buscar -->
                         <div id="section-buscar" class="menu-section active">
-                            <div class="search-box mb-4">
-                                <i class="fas fa-search search-icon"></i>
-                                <input type="number" id="buscarId" class="form-control" placeholder="Ingrese ID de usuario (ej: 1, 2, 3...)" min="1">
+                            <!-- Búsqueda por ID -->
+                            <div class="card mb-4">
+                                <div class="card-header bg-primary text-white">
+                                    <h5 class="mb-0"><i class="fas fa-hashtag me-2"></i>Buscar por ID</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="search-box mb-3">
+                                        <i class="fas fa-search search-icon"></i>
+                                        <input type="number" id="buscarId" class="form-control" placeholder="Ingrese ID de usuario (ej: 1, 2, 3...)" min="1">
+                                    </div>
+                                    <button class="btn btn-primary" onclick="buscarUsuario()">
+                                        <i class="fas fa-search me-2"></i> Buscar por ID
+                                    </button>
+                                </div>
                             </div>
                             
-                            <div class="text-center mb-4">
-                                <button class="btn btn-primary btn-lg px-5" onclick="buscarUsuario()">
-                                    <i class="fas fa-search me-2"></i> Buscar
-                                </button>
+                            <!-- Búsqueda por Nombre -->
+                            <div class="card">
+                                <div class="card-header bg-success text-white">
+                                    <h5 class="mb-0"><i class="fas fa-user me-2"></i>Buscar por Nombre</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="search-box mb-3">
+                                        <i class="fas fa-font search-icon"></i>
+                                        <input type="text" id="buscarNombre" class="form-control" placeholder="Ingrese nombre del usuario (ej: Juan, María...)">
+                                    </div>
+                                    <button class="btn btn-success" onclick="buscarPorNombre()">
+                                        <i class="fas fa-search me-2"></i> Buscar por Nombre
+                                    </button>
+                                </div>
                             </div>
+                            
+                            {% if error %}
+                            <div class="alert alert-danger mt-3">
+                                <i class="fas fa-exclamation-triangle me-2"></i>{{ error }}
+                            </div>
+                            {% endif %}
+                            
+                            {% if usuarios_encontrados %}
+                            <div class="mt-4">
+                                <h5>Resultados de búsqueda: "{{ busqueda_nombre }}"</h5>
+                                <p class="text-muted">{{ usuarios_encontrados|length }} usuario(s) encontrado(s)</p>
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead class="bg-primary text-white">
+                                            <tr>
+                                                <th>ID</th>
+                                                <th>Nombre</th>
+                                                <th>Correo</th>
+                                                <th>Teléfono</th>
+                                                <th>Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for u in usuarios_encontrados %}
+                                            <tr>
+                                                <td>{{ u.id }}</td>
+                                                <td>{{ u.nombre }}</td>
+                                                <td>{{ u.correo }}</td>
+                                                <td>{{ u.telefono|default:"N/A" }}</td>
+                                                <td>
+                                                    <a href="/generar_pdf/{{ u.id }}/" class="btn btn-sm btn-danger">
+                                                        <i class="fas fa-file-pdf"></i>
+                                                    </a>
+                                                    <a href="/generar_excel/{{ u.id }}/" class="btn btn-sm btn-success">
+                                                        <i class="fas fa-file-excel"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            {% endif %}
                             
                             <div id="resultadoBusqueda"></div>
                         </div>
@@ -459,6 +524,44 @@
             });
         }
         
+        function buscarPorNombre() {
+            const nombre = document.getElementById('buscarNombre').value;
+            
+            if (!nombre || nombre.trim().length < 1) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Por favor ingrese un nombre para buscar',
+                    confirmButtonColor: '#27ae60'
+                });
+                return;
+            }
+            
+            fetch('{% url "index" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: 'nombre_busqueda=' + encodeURIComponent(nombre)
+            })
+            .then(response => response.text())
+            .then(html => {
+                document.open();
+                document.write(html);
+                document.close();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Ocurrió un error al buscar por nombre',
+                    confirmButtonColor: '#e74c3c'
+                });
+            });
+        }
+        
         function mostrarUsuario(usuario) {
             const inicial = usuario.nombre.charAt(0).toUpperCase();
             
@@ -587,6 +690,12 @@
         document.getElementById('buscarId').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 buscarUsuario();
+            }
+        });
+        
+        document.getElementById('buscarNombre').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                buscarPorNombre();
             }
         });
     </script>
