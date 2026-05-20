@@ -202,6 +202,7 @@ El PDF incluye:
 - Datos del usuario
 - **Gráfico de Barras**: Usuarios por mes
 - **Gráfico de Torta**: Distribución por inicial
+- **Gráfico de Dispersión**: Posición X/Y por usuario
 - Estadísticas del sistema
 
 **Ruta**: `/generar_pdf/<id>/`
@@ -211,10 +212,24 @@ El PDF incluye:
 El Excel tiene múltiples hojas:
 - **Hoja 1**: Datos del usuario
 - **Hoja 2**: Estadísticas
-- **Hoja 3**: Gráfico de Barras
-- **Hoja 4**: Gráfico de Torta
+- **Hoja 3**: Gráfico de Barras (con gráfico interactivo)
+- **Hoja 4**: Gráfico de Torta (con gráfico interactivo)
+- **Hoja 5**: Gráfico de Dispersión (con gráfico interactivo)
 
 **Ruta**: `/generar_excel/<id>/`
+
+### 7.4 Búsqueda Avanzada
+
+La búsqueda permite:
+1. **Buscar por ID**: Ingresa el número de ID
+2. **Buscar por Nombre**: Ingresa el nombre (múltiples resultados)
+3. **Ver Estadísticas**: Gráficos de barras, torta, dispersión
+4. **Imprimir**: Botón para abrir PDF en nueva pestaña
+
+### 7.5 Impresión
+
+- Click en botón "Imprimir" abre el PDF en nueva pestaña
+- Desde el navegador se puede imprimir o guardar
 
 ### 7.4 Reporte General
 

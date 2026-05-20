@@ -151,17 +151,25 @@ python manage.py runserver
 
 ## Características
 
-### PDF con Gráficos
+### PDF con Gráficos (3 tipos)
 - **Gráfico de Barras**: Usuarios registrados por mes
 - **Gráfico de Torta**: Distribución por inicial del nombre
+- **Gráfico de Dispersión**: Posición X/Y por usuario
 - **Logo**: Imagen del sistema en el encabezado
 - **Estadísticas**: Métricas del sistema
 
-### Excel con Gráficos
+### Excel con Gráficos (5 hojas)
 - **Hoja 1**: Datos del usuario
 - **Hoja 2**: Estadísticas del sistema
-- **Hoja 3**: Gráfico de barras (visual)
-- **Hoja 4**: Gráfico de torta (visual)
+- **Hoja 3**: Gráfico de barras (visual + interactivo)
+- **Hoja 4**: Gráfico de torta (visual + interactivo)
+- **Hoja 5**: Gráfico de dispersión (visual + interactivo)
+
+### Búsqueda Avanzada
+- **Por ID**: Buscar usuario específico por identificador
+- **Por Nombre**: Buscar usuarios por nombre (múltiples resultados)
+- **Estadísticas**: Visualización de gráficos del usuario
+- **Impresión**: Opción de imprimir directamente el PDF
 
 ### Interfaz SPA
 - Menú lateral de navegación

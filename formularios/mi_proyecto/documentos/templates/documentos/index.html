@@ -250,7 +250,7 @@
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <h3 class="mb-0" id="sectionTitle">Buscar Usuario</h3>
-                                <p class="text-muted mb-0" id="sectionSubtitle">Ingrese el ID del usuario para generar informes</p>
+                                <p class="text-muted mb-0" id="sectionSubtitle">Buscar Usuario: Ingrese ID o Nombre para generar informes PDF/Excel con gráficos</p>
                             </div>
                             <div class="text-end">
                                 <span class="badge bg-primary fs-6">v1.0</span>
@@ -564,15 +564,21 @@
         
         function mostrarUsuario(usuario) {
             const inicial = usuario.nombre.charAt(0).toUpperCase();
+            const fecha = new Date().toLocaleDateString('es-ES');
             
             document.getElementById('resultadoBusqueda').innerHTML = `
                 <div class="fade-in">
                     <div class="user-card">
-                        <div class="d-flex align-items-center">
-                            <div class="avatar me-3">${inicial}</div>
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center">
+                                <div class="avatar me-3">${inicial}</div>
+                                <div>
+                                    <h4 class="mb-0">${usuario.nombre}</h4>
+                                    <small>ID: ${usuario.id}</small>
+                                </div>
+                            </div>
                             <div>
-                                <h4 class="mb-0">${usuario.nombre}</h4>
-                                <small>ID: ${usuario.id}</small>
+                                <span class="badge bg-light text-dark">Fecha: ${fecha}</span>
                             </div>
                         </div>
                     </div>
@@ -593,24 +599,52 @@
                             <div class="stat-value">${usuario.direccion !== 'N/A' ? '1' : '0'}</div>
                             <div class="stat-label">Dirección</div>
                         </div>
+                        <div class="stat-item">
+                            <div class="stat-icon">📊</div>
+                            <div class="stat-value">3</div>
+                            <div class="stat-label">Gráficos</div>
+                        </div>
                     </div>
                     
                     <div class="table-section">
-                        <h6 class="mb-3">Datos del Usuario</h6>
+                        <h6 class="mb-3"><i class="fas fa-user-circle me-2"></i>Datos del Usuario</h6>
                         <table class="table table-bordered">
+                            <tr><td><strong>ID</strong></td><td>${usuario.id}</td></tr>
                             <tr><td><strong>Nombre</strong></td><td>${usuario.nombre}</td></tr>
                             <tr><td><strong>Correo</strong></td><td>${usuario.correo}</td></tr>
                             <tr><td><strong>Teléfono</strong></td><td>${usuario.telefono}</td></tr>
                             <tr><td><strong>Dirección</strong></td><td>${usuario.direccion}</td></tr>
-                            <tr><td><strong>Fecha</strong></td><td>${usuario.fecha}</td></tr>
+                            <tr><td><strong>Fecha de Creación</strong></td><td>${usuario.fecha}</td></tr>
                         </table>
+                        
+                        <h6 class="mt-4 mb-3"><i class="fas fa-chart-pie me-2"></i>Estadísticas del Usuario</h6>
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <div class="alert alert-info">
+                                    <strong>Barras:</strong> Distribución por mes
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="alert alert-warning">
+                                    <strong>Torta:</strong> Distribución por inicial
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="alert alert-success">
+                                    <strong>Dispersión:</strong> Posición vs categoría
+                                </div>
+                            </div>
+                        </div>
                         
                         <div class="d-flex gap-3 mt-4">
                             <button class="btn btn-option pdf flex-fill" onclick="descargarPDF(${usuario.id})">
-                                <i class="fas fa-file-pdf me-2"></i> Descargar PDF
+                                <i class="fas fa-file-pdf me-2"></i> PDF
                             </button>
                             <button class="btn btn-option excel flex-fill" onclick="descargarExcel(${usuario.id})">
-                                <i class="fas fa-file-excel me-2"></i> Descargar Excel
+                                <i class="fas fa-file-excel me-2"></i> Excel
+                            </button>
+                            <button class="btn btn-primary flex-fill" onclick="imprimirPagina(${usuario.id})">
+                                <i class="fas fa-print me-2"></i> Imprimir
                             </button>
                         </div>
                     </div>
@@ -647,6 +681,18 @@
                 didOpen: () => { Swal.showLoading(); }
             }).then(() => {
                 window.location.href = '/generar_excel/' + id + '/';
+            });
+        }
+        
+        function imprimirPagina(id) {
+            Swal.fire({
+                title: 'Preparando impresión',
+                html: 'Abriendo ventana de impresión...',
+                timer: 1500,
+                timerProgressBar: true,
+                didOpen: () => { Swal.showLoading(); }
+            }).then(() => {
+                window.open('/generar_pdf/' + id + '/', '_blank');
             });
         }
         

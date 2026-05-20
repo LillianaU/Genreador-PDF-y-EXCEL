@@ -259,68 +259,108 @@ def generar_pdf(request, id_usuario):
             ]))
             elements.append(stats_table)
 
-            # Gráfico de Barras
+            # Gráfico de Barras - Distribución real por mes
             if usuarios_mes:
-                elements.append(Paragraph("GRÁFICO DE BARRAS - USUARIOS POR MES", section_style))
+                elements.append(Paragraph("📊 GRÁFICO DE BARRAS - USUARIOS POR MES (DATOS REALES)", section_style))
                 
-                chart_data = [['Mes', 'Cantidad']]
-                max_val = 0
+                chart_data = [['Mes', 'Cantidad', '█ Barra']]
+                max_val = max(cant for _, cant in usuarios_mes) if usuarios_mes else 1
+                
                 for mes, cantidad in usuarios_mes[:12]:
-                    chart_data.append([str(mes), cantidad])
-                    if cantidad > max_val:
-                        max_val = cantidad
+                    bar_length = int((cantidad / max_val) * 20)
+                    barra = '█' * bar_length
+                    chart_data.append([str(mes), str(cantidad), barra])
                 
-                # Crear gráfico de barras usando tabla visual
-                bar_table = Table(chart_data, colWidths=[1.5*inch, 3*inch])
+                bar_table = Table(chart_data, colWidths=[1.2*inch, 0.8*inch, 2.5*inch])
                 bar_styles = [
                     ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#3498db')),
                     ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
                     ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
                     ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
                     ('FONTSIZE', (0, 0), (-1, 0), 10),
+                    ('BACKGROUND', (0, 1), (0, -1), colors.HexColor('#ecf0f1')),
+                    ('BACKGROUND', (1, 1), (1, -1), colors.HexColor('#3498db')),
+                    ('TEXTCOLOR', (1, 1), (1, -1), colors.white),
+                    ('FONTNAME', (1, 1), (1, -1), 'Helvetica-Bold'),
+                    ('BACKGROUND', (2, 1), (2, -1), colors.HexColor('#d5dbdb')),
+                    ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#bdc3c7')),
                 ]
-                
-                for i, (_, cantidad) in enumerate(usuarios_mes[:12], 1):
-                    bar_width = (cantidad / max_val) * 2.5 if max_val > 0 else 0
-                    bar_styles.append(('BACKGROUND', (1, i), (1, i), colors.HexColor('#3498db')))
-                    bar_styles.append(('BOX', (1, i), (1, i), 1, colors.HexColor('#2980b9')))
                 
                 bar_table.setStyle(TableStyle(bar_styles))
                 elements.append(bar_table)
+                elements.append(Spacer(1, 10))
 
-            # Gráfico de Torta (Distribución por inicial)
+            # Gráfico de Torta - Distribución real por inicial
             if usuarios_inicial:
-                elements.append(Paragraph("GRÁFICO DE TORTA - DISTRIBUCIÓN POR INICIAL", section_style))
+                elements.append(Paragraph("🥧 GRÁFICO DE TORTA - DISTRIBUCIÓN POR INICIAL (DATOS REALES)", section_style))
                 
                 # Colores para torta
                 colores_torta = ['#e74c3c', '#3498db', '#27ae60', '#f39c12', '#9b59b6', 
                                 '#1abc9c', '#e67e22', '#34495e', '#16a085', '#2c3e50']
                 
-                torta_data = [['Inicial', 'Cantidad', 'Porcentaje']]
                 total_inicial = sum(cant for _, cant in usuarios_inicial)
                 
+                torta_data = [['Inicial', 'Cantidad', '%', '█████████████']]
                 for i, (inicial, cantidad) in enumerate(usuarios_inicial[:10]):
                     porcentaje = (cantidad / total_inicial) * 100 if total_inicial > 0 else 0
+                    barras = '█' * int(porcentaje / 5)
                     color = colores_torta[i % len(colores_torta)]
-                    torta_data.append([inicial or '?', str(cantidad), f'{porcentaje:.1f}%'])
+                    torta_data.append([inicial or '?', str(cantidad), f'{porcentaje:.1f}%', barras])
                 
-                torta_table = Table(torta_data, colWidths=[1*inch, 1.5*inch, 1.5*inch])
+                torta_table = Table(torta_data, colWidths=[0.8*inch, 0.8*inch, 0.8*inch, 2*inch])
                 torta_styles = [
                     ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#9b59b6')),
                     ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
                     ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
                     ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
                     ('FONTSIZE', (0, 0), (-1, 0), 10),
+                    ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#bdc3c7')),
                 ]
                 
                 for i in range(len(usuarios_inicial[:10])):
                     color = colores_torta[i % len(colores_torta)]
                     torta_styles.append(('BACKGROUND', (0, i+1), (-1, i+1), colors.HexColor(color + '20')))
-                    torta_styles.append(('TEXTCOLOR', (0, i+1), (0, i+1), colors.HexColor(color)))
-                    torta_styles.append(('FONTNAME', (0, i+1), (0, i+1), 'Helvetica-Bold'))
                 
                 torta_table.setStyle(TableStyle(torta_styles))
                 elements.append(torta_table)
+                elements.append(Spacer(1, 10))
+
+            # Gráfico de Dispersión - Datos reales de usuarios
+            elements.append(Paragraph("⚡ GRÁFICO DE DISPERSIÓN - DISTRIBUCIÓN REAL DE USUARIOS", section_style))
+            
+            with connection.cursor() as cursor:
+                cursor.execute("""
+                    SELECT id, LENGTH(nombre) as len_nombre, LENGTH(correo) as len_correo 
+                    FROM usuarios 
+                    ORDER BY id
+                    LIMIT 15
+                """)
+                dispersion_real = cursor.fetchall()
+            
+            dispersion_data = [['ID', 'Long. Nombre', 'Long. Correo', 'Zona']]
+            for uid, len_nom, len_correo in dispersion_real:
+                zona = 'A' if len_nom > 8 else ('B' if len_nom > 5 else 'C')
+                dispersion_data.append([str(uid), str(len_nom or 0), str(len_correo or 0), zona])
+            
+            dispersion_table = Table(dispersion_data, colWidths=[0.6*inch, 1.2*inch, 1.2*inch, 1*inch])
+            dispersion_styles = [
+                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#e67e22')),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, 0), 10),
+                ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#bdc3c7')),
+            ]
+            
+            for i in range(1, len(dispersion_data)):
+                colors_disp = ['#e74c3c', '#3498db', '#27ae60']
+                color = colors_disp[(i - 1) % 3]
+                dispersion_styles.append(('BACKGROUND', (3, i), (3, i), colors.HexColor(color + '30')))
+                dispersion_styles.append(('TEXTCOLOR', (3, i), (3, i), colors.HexColor(color)))
+                dispersion_styles.append(('FONTNAME', (3, i), (3, i), 'Helvetica-Bold'))
+            
+            dispersion_table.setStyle(TableStyle(dispersion_styles))
+            elements.append(dispersion_table)
 
             # Leyenda del gráfico de torta
             elements.append(Paragraph("LEYENDA DE COLORES", section_style))
@@ -562,19 +602,23 @@ def generar_excel(request, id_usuario):
             ws_stats.column_dimensions['C'].width = 30
             ws_stats.column_dimensions['D'].width = 15
 
-            # Hoja 3: Gráfico de Barras
+            # Hoja 3: Gráfico de Barras - DATOS REALES
             if usuarios_mes:
                 ws_barras = wb.create_sheet("Gráfico Barras")
                 
                 ws_barras.merge_cells('A1:C1')
-                ws_barras['A1'] = "GRÁFICO DE BARRAS - USUARIOS POR MES"
+                ws_barras['A1'] = "📊 GRÁFICO DE BARRAS - USUARIOS POR MES (DATOS REALES)"
                 ws_barras['A1'].font = Font(bold=True, size=14, color="ffffff")
                 ws_barras['A1'].fill = PatternFill(start_color="3498db", end_color="3498db", fill_type="solid")
                 ws_barras['A1'].alignment = Alignment(horizontal='center')
 
-                chart_data = [['Mes', 'Cantidad']]
+                chart_data = [['Mes', 'Cantidad', 'Barra Visual']]
+                max_val = max(cant for _, cant in usuarios_mes) if usuarios_mes else 1
+                
                 for mes, cantidad in usuarios_mes[:12]:
-                    chart_data.append([str(mes), cantidad])
+                    bar_length = int((cantidad / max_val) * 15)
+                    barra = '█' * bar_length
+                    chart_data.append([str(mes), cantidad, barra])
 
                 for row_idx, row_data in enumerate(chart_data, 3):
                     for col_idx, value in enumerate(row_data, 1):
@@ -584,17 +628,22 @@ def generar_excel(request, id_usuario):
                         if row_idx == 3:
                             cell.font = header_font
                             cell.fill = PatternFill(start_color="3498db", end_color="3498db", fill_type="solid")
-                        elif row_idx > 3 and col_idx == 2:
-                            cell.fill = PatternFill(start_color="3498db", end_color="3498db", fill_type="solid")
+                        elif row_idx > 3:
+                            if col_idx == 2:
+                                cell.fill = PatternFill(start_color="3498db", end_color="3498db", fill_type="solid")
+                                cell.font = Font(color="ffffff", bold=True)
+                            elif col_idx == 3:
+                                cell.font = Font(color="7f8c8d")
 
-                ws_barras.column_dimensions['A'].width = 20
-                ws_barras.column_dimensions['B'].width = 15
+                ws_barras.column_dimensions['A'].width = 15
+                ws_barras.column_dimensions['B'].width = 12
+                ws_barras.column_dimensions['C'].width = 20
 
                 # Agregar gráfico de barras
                 chart = BarChart()
                 chart.type = "col"
                 chart.style = 10
-                chart.title = "Usuarios por Mes"
+                chart.title = "Usuarios por Mes (Real)"
                 chart.y_axis.title = 'Cantidad'
                 chart.x_axis.title = 'Mes'
 
@@ -607,23 +656,24 @@ def generar_excel(request, id_usuario):
 
                 ws_barras.add_chart(chart, "E3")
 
-            # Hoja 4: Gráfico de Torta
+            # Hoja 4: Gráfico de Torta - DATOS REALES
             if usuarios_inicial:
                 ws_torta = wb.create_sheet("Gráfico Torta")
                 
-                ws_torta.merge_cells('A1:C1')
-                ws_torta['A1'] = "GRÁFICO DE TORTA - DISTRIBUCIÓN POR INICIAL"
+                ws_torta.merge_cells('A1:D1')
+                ws_torta['A1'] = "🥧 GRÁFICO DE TORTA - DISTRIBUCIÓN POR INICIAL (DATOS REALES)"
                 ws_torta['A1'].font = Font(bold=True, size=14, color="ffffff")
                 ws_torta['A1'].fill = PatternFill(start_color="9b59b6", end_color="9b59b6", fill_type="solid")
                 ws_torta['A1'].alignment = Alignment(horizontal='center')
 
                 total_inicial = sum(cant for _, cant in usuarios_inicial)
-                torta_data = [['Inicial', 'Cantidad', 'Porcentaje']]
+                torta_data = [['Inicial', 'Cantidad', '%', 'Visual']]
                 colores = ['e74c3c', '3498db', '27ae60', 'f39c12', '9b59b6', '1abc9c', 'e67e22', '34495e', '16a085', '2c3e50']
                 
                 for i, (inicial, cantidad) in enumerate(usuarios_inicial[:10]):
                     porcentaje = (cantidad / total_inicial) * 100 if total_inicial > 0 else 0
-                    torta_data.append([inicial or '?', cantidad, f'{porcentaje:.1f}%'])
+                    barras = '█' * int(porcentaje / 5)
+                    torta_data.append([inicial or '?', cantidad, f'{porcentaje:.1f}%', barras])
 
                 for row_idx, row_data in enumerate(torta_data, 3):
                     for col_idx, value in enumerate(row_data, 1):
@@ -635,16 +685,17 @@ def generar_excel(request, id_usuario):
                             cell.fill = PatternFill(start_color="9b59b6", end_color="9b59b6", fill_type="solid")
                         elif row_idx > 3:
                             color = colores[(row_idx - 4) % len(colores)]
-                            cell.fill = PatternFill(start_color=color, end_color=color, fill_type="solid")
-                            cell.font = Font(color="ffffff", bold=True)
+                            if col_idx == 1:
+                                cell.font = Font(bold=True, color=color)
 
-                ws_torta.column_dimensions['A'].width = 15
-                ws_torta.column_dimensions['B'].width = 15
-                ws_torta.column_dimensions['C'].width = 15
+                ws_torta.column_dimensions['A'].width = 10
+                ws_torta.column_dimensions['B'].width = 10
+                ws_torta.column_dimensions['C'].width = 10
+                ws_torta.column_dimensions['D'].width = 20
 
                 # Agregar gráfico de torta
                 pie = PieChart()
-                pie.title = "Distribución por Inicial"
+                pie.title = "Distribución por Inicial (Real)"
                 
                 data_ref = Reference(ws_torta, min_col=2, min_row=3, max_row=3+len(usuarios_inicial[:10]))
                 cats_ref = Reference(ws_torta, min_col=1, min_row=4, max_row=3+len(usuarios_inicial[:10]))
@@ -653,7 +704,67 @@ def generar_excel(request, id_usuario):
                 pie.height = 12
                 pie.width = 20
 
-                ws_torta.add_chart(pie, "E3")
+                ws_torta.add_chart(pie, "F3")
+
+            # Hoja 5: Gráfico de Dispersión - DATOS REALES
+            ws_dispersion = wb.create_sheet("Gráfico Dispersión")
+            
+            ws_dispersion.merge_cells('A1:E1')
+            ws_dispersion['A1'] = "⚡ GRÁFICO DE DISPERSIÓN - DISTRIBUCIÓN REAL (DATOS REALES)"
+            ws_dispersion['A1'].font = Font(bold=True, size=14, color="ffffff")
+            ws_dispersion['A1'].fill = PatternFill(start_color="e67e22", end_color="e67e22", fill_type="solid")
+            ws_dispersion['A1'].alignment = Alignment(horizontal='center')
+
+            # Obtener datos reales
+            with connection.cursor() as cursor:
+                cursor.execute("""
+                    SELECT id, LENGTH(nombre) as len_nom, LENGTH(correo) as len_corr 
+                    FROM usuarios ORDER BY id LIMIT 15
+                """)
+                disp_real = cursor.fetchall()
+            
+            dispersion_data = [['ID', 'Long. Nombre', 'Long. Correo', 'Zona', 'Punto']]
+            for uid, len_nom, len_corr in disp_real:
+                zona = 'A' if len_nom > 8 else ('B' if len_nom > 5 else 'C')
+                dispersion_data.append([uid, len_nom or 0, len_corr or 0, zona, f'({len_nom or 0},{len_corr or 0})'])
+
+            for row_idx, row_data in enumerate(dispersion_data, 3):
+                for col_idx, value in enumerate(row_data, 1):
+                    cell = ws_dispersion.cell(row=row_idx, column=col_idx, value=value)
+                    cell.border = border
+                    
+                    if row_idx == 3:
+                        cell.font = header_font
+                        cell.fill = PatternFill(start_color="e67e22", end_color="e67e22", fill_type="solid")
+                    elif row_idx > 3:
+                        colors_disp = ['e74c3c', '3498db', '27ae60']
+                        color = colors_disp[(row_idx - 4) % 3]
+                        if col_idx == 4:  # Zona
+                            cell.fill = PatternFill(start_color=color, end_color=color, fill_type="solid")
+                            cell.font = Font(color="ffffff", bold=True)
+
+            ws_dispersion.column_dimensions['A'].width = 8
+            ws_dispersion.column_dimensions['B'].width = 15
+            ws_dispersion.column_dimensions['C'].width = 15
+            ws_dispersion.column_dimensions['D'].width = 10
+            ws_dispersion.column_dimensions['E'].width = 15
+
+            # Agregar gráfico de dispersión
+            from openpyxl.chart import ScatterChart, Series
+            
+            chart = ScatterChart()
+            chart.title = "Dispersión Real de Usuarios"
+            chart.x_axis.title = "Longitud Nombre"
+            chart.y_axis.title = "Longitud Correo"
+            
+            xvalues = Reference(ws_dispersion, min_col=2, min_row=4, max_row=4+len(disp_real))
+            yvalues = Reference(ws_dispersion, min_col=3, min_row=4, max_row=4+len(disp_real))
+            series = Series(yvalues, xvalues, title="Usuarios")
+            chart.series.append(series)
+            chart.height = 12
+            chart.width = 20
+            
+            ws_dispersion.add_chart(chart, "G3")
 
             response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
             response['Content-Disposition'] = f'attachment; filename="usuario_{id_usuario}_{datetime.now().strftime("%Y%m%d")}.xlsx"'
