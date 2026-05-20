@@ -1,17 +1,17 @@
 from PIL import Image, ImageDraw
 
-# Crear imagen 200x200
-img = Image.new('RGB', (200, 200), color='#667eea')
+# Crear imagen 200x200 con gradiente azul
+img = Image.new('RGB', (200, 200), color='#0066cc')
 draw = ImageDraw.Draw(img)
 
-# Círculo blanco
-draw.ellipse([20, 20, 180, 180], fill='white')
+# Círculo blanco centrado
+draw.ellipse([30, 30, 170, 170], fill='white')
 
-# Dibujar rectángulo central
-draw.rectangle([70, 60, 130, 140], fill='#667eea')
+# Rectángulo azul oscuro
+draw.rectangle([70, 60, 130, 140], fill='#0066cc')
 
-# Texto SG
-draw.text((75, 75), 'SG', fill='white')
+# Texto SG en blanco
+draw.text((75, 82), 'SG', fill='white')
 
 # Guardar
 img.save('mi_proyecto/documentos/static/images/logo.png')

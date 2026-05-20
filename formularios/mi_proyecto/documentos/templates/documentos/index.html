@@ -1,239 +1,592 @@
 <!DOCTYPE html>
 <html lang="es">
+{% load static %}
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Gestión - PDF y Excel</title>
     
-    {% load static %}
-    
+    <!-- Bootstrap CSS Local -->
     <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <!-- Font Awesome (descargado localmente usando CDN fallback) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- SweetAlert2 CSS Local -->
     <link rel="stylesheet" href="{% static 'css/sweetalert2.min.css' %}">
+    <!-- Estilos personalizados -->
     <link rel="stylesheet" href="{% static 'css/estilos.css' %}">
     
     <style>
-        .sidebar {
-            min-height: 100vh;
-            background: linear-gradient(180deg, #1a252f 0%, #2c3e50 100%);
-            box-shadow: 4px 0 15px rgba(0,0,0,0.1);
+        :root {
+            --primary-color: #0066cc;
+            --secondary-color: #1e5fa8;
+            --accent-color: #00a3ff;
+            --success-color: #00a86b;
+            --warning-color: #ff9500;
+            --danger-color: #d32f2f;
+            --light-bg: #f5f7fa;
+            --border-color: #e0e3e8;
         }
-        
-        .nav-link-custom {
-            color: #bdc3c7;
-            padding: 12px 20px;
-            border-radius: 8px;
-            margin: 5px 0;
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-        
-        .nav-link-custom:hover, .nav-link-custom.active {
-            background: rgba(52, 152, 219, 0.2);
-            color: #3498db;
-        }
-        
-        .nav-link-custom i {
-            width: 25px;
-        }
-        
-        .main-content {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, sans-serif;
+            background-color: var(--light-bg);
             min-height: 100vh;
             padding: 20px;
         }
-        
-        .card-spa {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            overflow: hidden;
-        }
-        
-        .search-box {
-            position: relative;
-        }
-        
-        .search-box .form-control {
-            border-radius: 50px;
-            padding: 12px 20px 12px 50px;
-            border: 2px solid #e0e0e0;
-            transition: all 0.3s;
-        }
-        
-        .search-box .form-control:focus {
-            border-color: #3498db;
-            box-shadow: 0 0 0 4px rgba(52, 152, 219, 0.1);
-        }
-        
-        .search-icon {
-            position: absolute;
-            left: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #95a5a6;
-        }
-        
-        .btn-option {
+
+        /* Header Principal */
+        .header-main {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            padding: 35px 25px;
             border-radius: 12px;
-            padding: 15px 25px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            border: 2px solid transparent;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 12px rgba(0, 102, 204, 0.15);
+            text-align: center;
         }
-        
-        .btn-option:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-        }
-        
-        .btn-option.pdf {
-            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
-            color: white;
-        }
-        
-        .btn-option.excel {
-            background: linear-gradient(135deg, #27ae60 0%, #1e8449 100%);
-            color: white;
-        }
-        
-        .menu-section {
-            display: none;
-        }
-        
-        .menu-section.active {
-            display: block;
-            animation: fadeIn 0.4s ease;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .user-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 15px;
-            padding: 20px;
-            color: white;
-            margin-bottom: 20px;
-        }
-        
-        .user-card .avatar {
-            width: 60px;
-            height: 60px;
-            background: white;
-            border-radius: 50%;
+
+        .header-main h1 {
+            font-weight: 700;
+            font-size: 2.2rem;
+            margin-bottom: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
-            color: #667eea;
-            font-weight: bold;
-        }
-        
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
             gap: 15px;
-            margin: 20px 0;
         }
-        
-        .stat-item {
-            background: #f8f9fa;
-            border-radius: 12px;
-            padding: 15px;
-            text-align: center;
-            transition: all 0.3s;
+
+        .header-main p {
+            font-size: 1rem;
+            opacity: 0.95;
         }
-        
-        .stat-item:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+
+        /* Menú Acordeón Flotante */
+        .floating-menu {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            max-width: 300px;
+            width: 100%;
         }
-        
-        .stat-icon {
-            font-size: 24px;
-            margin-bottom: 8px;
-        }
-        
-        .stat-value {
-            font-size: 24px;
-            font-weight: bold;
-            color: #2c3e50;
-        }
-        
-        .stat-label {
-            font-size: 12px;
-            color: #7f8c8d;
-        }
-        
-        .table-section {
-            background: white;
-            border-radius: 15px;
-            padding: 20px;
-            margin-top: 20px;
-        }
-        
-        .table-user {
-            background: white;
-            border-radius: 10px;
-            overflow: hidden;
-        }
-        
-        .table-user thead {
-            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
-            color: white;
-        }
-        
-        .table-user tbody tr:hover {
-            background: #f8f9fa;
-        }
-        
-        .table-user .btn-sm {
-            padding: 5px 10px;
-            font-size: 12px;
-        }
-        
-        .dropdown-menu-custom {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+
+        .menu-toggle {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
             border: none;
-            padding: 10px;
+            color: white;
+            font-size: 22px;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(0, 102, 204, 0.3);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
         }
-        
-        .dropdown-item-custom {
+
+        .menu-toggle:hover {
+            transform: scale(1.08);
+            box-shadow: 0 8px 25px rgba(0, 102, 204, 0.4);
+        }
+
+        .menu-toggle.active i::before { content: '\f00d'; }
+
+        .accordion-panel {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            margin-bottom: 10px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            border: 1px solid var(--border-color);
+        }
+
+        .accordion-panel.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .accordion-header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            padding: 14px 16px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            font-size: 14px;
+            border: none;
+            width: 100%;
+            text-align: left;
+            transition: all 0.3s ease;
+        }
+
+        .accordion-header:hover {
+            background: linear-gradient(135deg, #0055aa 0%, #1a4a8f 100%);
+        }
+
+        .accordion-header.active {
+            background: linear-gradient(135deg, var(--accent-color) 0%, #0077cc 100%);
+        }
+
+        .accordion-icon {
+            transition: transform 0.3s ease;
+            font-size: 12px;
+        }
+
+        .accordion-icon.rotate { transform: rotate(180deg); }
+
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .accordion-content.show { max-height: 500px; }
+
+        .accordion-body { padding: 15px; }
+
+        .menu-item {
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
             border-radius: 8px;
-            padding: 10px 15px;
-            transition: all 0.2s;
         }
-        
-        .dropdown-item-custom:hover {
-            background: #3498db;
+
+        .menu-item:last-child { border-bottom: none; }
+
+        .menu-item:hover {
+            background-color: #f0f4f9;
+            padding-left: 8px;
+        }
+
+        .menu-item-icon {
+            width: 35px;
+            height: 35px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .menu-item-text {
+            flex: 1;
+            color: #333;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        /* Contenido Principal */
+        .main-content {
+            max-width: 1000px;
+            margin: 0 auto;
+            margin-left: 100px;
+        }
+
+        /* Tarjetas */
+        .info-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .info-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 102, 204, 0.12);
+        }
+
+        .info-header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            padding: 14px 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .info-icon {
+            font-size: 20px;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255,255,255,0.2);
+            border-radius: 8px;
+        }
+
+        .info-title {
+            font-size: 15px;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .info-body { padding: 18px; }
+
+        /* Inputs */
+        .search-box {
+            position: relative;
+            margin-bottom: 15px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 16px 12px 40px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #888;
+        }
+
+        /* Buttons */
+        .btn-custom {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary-custom {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            border: none;
+        }
+
+        .btn-primary-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 102, 204, 0.3);
+        }
+
+        .btn-success-custom {
+            background: linear-gradient(135deg, var(--success-color) 0%, #008855 100%);
+            color: white;
+            border: none;
+        }
+
+        .btn-success-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 168, 107, 0.3);
+        }
+
+        .btn-danger-custom {
+            background: linear-gradient(135deg, var(--danger-color) 0%, #b71c1c 100%);
+            color: white;
+            border: none;
+        }
+
+        /* Modal */
+        .modal-header-custom {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
             color: white;
         }
+
+        .modal-body-custom {
+            padding: 25px;
+        }
+
+        .user-avatar-lg {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            color: white;
+            font-weight: bold;
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .main-content { margin-left: 0; }
+            .floating-menu { max-width: 280px; left: 15px; }
+        }
+
+        @media (max-width: 768px) {
+            .floating-menu { max-width: 260px; }
+            .menu-toggle { width: 55px; height: 55px; font-size: 20px; }
+            .header-main h1 { font-size: 1.8rem; flex-direction: column; gap: 8px; }
+        }
+
+        /* Animaciones */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .info-card { animation: fadeInUp 0.4s ease forwards; }
+        .info-card:nth-child(1) { animation-delay: 0.1s; }
+        .info-card:nth-child(2) { animation-delay: 0.2s; }
     </style>
 </head>
 <body>
-    <!-- Modal de Resumen de Usuario -->
+
+    <!-- Header Principal -->
+    <div class="header-main">
+        <h1>
+            {% if logo_exists %}
+            <img src="{% static 'images/logo.png' %}" alt="Logo" width="50" height="50" style="border-radius: 8px;">
+            {% else %}
+            <i class="fas fa-file-pdf"></i>
+            {% endif %}
+            Sistema de Gestión
+        </h1>
+        <p>Generador de Informes PDF y Excel con Gráficos Estadísticos</p>
+    </div>
+
+    <!-- Menú Acordeón Flotante -->
+    <div class="floating-menu">
+        <button class="menu-toggle" id="menuToggle" onclick="toggleMenu()">
+            <i class="fas fa-bars"></i>
+        </button>
+
+        <!-- Panel: Búsqueda -->
+        <div class="accordion-panel" id="searchPanel">
+            <button class="accordion-header" onclick="toggleAccordion(this)">
+                <span><i class="fas fa-search" style="margin-right: 8px;"></i>Búsqueda</span>
+                <span class="accordion-icon"><i class="fas fa-chevron-down"></i></span>
+            </button>
+            <div class="accordion-content">
+                <div class="accordion-body">
+                    <div class="menu-item" onclick="showSection('buscar-id')">
+                        <div class="menu-item-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);">
+                            <i class="fas fa-hashtag"></i>
+                        </div>
+                        <div class="menu-item-text">Buscar por ID</div>
+                    </div>
+                    <div class="menu-item" onclick="showSection('buscar-nombre')">
+                        <div class="menu-item-icon" style="background: linear-gradient(135deg, #00a86b, #00c853);">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="menu-item-text">Buscar por Nombre</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel: Informes -->
+        <div class="accordion-panel" id="reportsPanel">
+            <button class="accordion-header" onclick="toggleAccordion(this)">
+                <span><i class="fas fa-file-alt" style="margin-right: 8px;"></i>Informes</span>
+                <span class="accordion-icon"><i class="fas fa-chevron-down"></i></span>
+            </button>
+            <div class="accordion-content">
+                <div class="accordion-body">
+                    <div class="menu-item" onclick="generarPDFTodos()">
+                        <div class="menu-item-icon" style="background: linear-gradient(135deg, #d32f2f, #b71c1c);">
+                            <i class="fas fa-file-pdf"></i>
+                        </div>
+                        <div class="menu-item-text">Generar PDF General</div>
+                    </div>
+                    <div class="menu-item" onclick="generarExcelTodos()">
+                        <div class="menu-item-icon" style="background: linear-gradient(135deg, #00a86b, #008855);">
+                            <i class="fas fa-file-excel"></i>
+                        </div>
+                        <div class="menu-item-text">Generar Excel General</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel: Gráficos -->
+        <div class="accordion-panel" id="chartsPanel">
+            <button class="accordion-header" onclick="toggleAccordion(this)">
+                <span><i class="fas fa-chart-pie" style="margin-right: 8px;"></i>Gráficos</span>
+                <span class="accordion-icon"><i class="fas fa-chevron-down"></i></span>
+            </button>
+            <div class="accordion-content">
+                <div class="accordion-body">
+                    <div class="menu-item">
+                        <div class="menu-item-icon" style="background: linear-gradient(135deg, #3498db, #2980b9);">
+                            <i class="fas fa-chart-bar"></i>
+                        </div>
+                        <div class="menu-item-text">Gráfico de Barras</div>
+                    </div>
+                    <div class="menu-item">
+                        <div class="menu-item-icon" style="background: linear-gradient(135deg, #9b59b6, #7d3c98);">
+                            <i class="fas fa-chart-pie"></i>
+                        </div>
+                        <div class="menu-item-text">Gráfico de Torta</div>
+                    </div>
+                    <div class="menu-item">
+                        <div class="menu-item-icon" style="background: linear-gradient(135deg, #e67e22, #d35400);">
+                            <i class="fas fa-dot-circle"></i>
+                        </div>
+                        <div class="menu-item-text">Gráfico de Dispersión</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel: Lista -->
+        <div class="accordion-panel" id="listPanel">
+            <button class="accordion-header" onclick="toggleAccordion(this)">
+                <span><i class="fas fa-users" style="margin-right: 8px;"></i>Usuarios</span>
+                <span class="accordion-icon"><i class="fas fa-chevron-down"></i></span>
+            </button>
+            <div class="accordion-content">
+                <div class="accordion-body">
+                    <div class="menu-item" onclick="cargarLista()">
+                        <div class="menu-item-icon" style="background: linear-gradient(135deg, #6c757d, #495057);">
+                            <i class="fas fa-list"></i>
+                        </div>
+                        <div class="menu-item-text">Ver Todos los Usuarios</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenido Principal -->
+    <div class="main-content">
+        
+        <!-- Buscar por ID -->
+        <div class="info-card" id="card-buscar-id">
+            <div class="info-header">
+                <div class="info-icon"><i class="fas fa-hashtag"></i></div>
+                <p class="info-title">Buscar Usuario por ID</p>
+            </div>
+            <div class="info-body">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="number" id="buscarId" class="form-control" placeholder="Ingrese ID de usuario (ej: 1, 2, 3...)" min="1">
+                </div>
+                <button class="btn btn-primary-custom" onclick="buscarUsuario()">
+                    <i class="fas fa-search"></i> Buscar
+                </button>
+            </div>
+        </div>
+
+        <!-- Buscar por Nombre -->
+        <div class="info-card" id="card-buscar-nombre" style="display: none;">
+            <div class="info-header" style="background: linear-gradient(135deg, #00a86b, #00c853);">
+                <div class="info-icon"><i class="fas fa-user"></i></div>
+                <p class="info-title">Buscar Usuario por Nombre</p>
+            </div>
+            <div class="info-body">
+                <div class="search-box">
+                    <i class="fas fa-font"></i>
+                    <input type="text" id="buscarNombre" class="form-control" placeholder="Ingrese nombre del usuario (ej: Juan, María...)">
+                </div>
+                <button class="btn btn-success-custom" onclick="buscarPorNombre()">
+                    <i class="fas fa-search"></i> Buscar por Nombre
+                </button>
+            </div>
+        </div>
+
+        <!-- Resultados -->
+        {% if error %}
+        <div class="alert alert-danger" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>{{ error }}
+        </div>
+        {% endif %}
+
+        {% if usuarios_encontrados %}
+        <div class="info-card">
+            <div class="info-header" style="background: linear-gradient(135deg, #00a86b, #00c853);">
+                <div class="info-icon"><i class="fas fa-users"></i></div>
+                <p class="info-title">Resultados: "{{ busqueda_nombre }}" ({{ usuarios_encontrados|length }} encontrados)</p>
+            </div>
+            <div class="info-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th><i class="fas fa-hashtag me-1"></i>ID</th>
+                                <th><i class="fas fa-user me-1"></i>Nombre</th>
+                                <th><i class="fas fa-envelope me-1"></i>Correo</th>
+                                <th><i class="fas fa-phone me-1"></i>Teléfono</th>
+                                <th><i class="fas fa-cogs me-1"></i>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for u in usuarios_encontrados %}
+                            <tr>
+                                <td>{{ u.id }}</td>
+                                <td>{{ u.nombre }}</td>
+                                <td>{{ u.correo }}</td>
+                                <td>{{ u.telefono|default:"N/A" }}</td>
+                                <td>
+                                    <button class="btn btn-sm btn-danger" onclick="descargarPDF({{ u.id }})" title="PDF">
+                                        <i class="fas fa-file-pdf"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-success" onclick="descargarExcel({{ u.id }})" title="Excel">
+                                        <i class="fas fa-file-excel"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+
+    <!-- Modal de Usuario -->
     <div class="modal fade" id="usuarioModal" tabindex="-1" aria-labelledby="usuarioModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content">
-                <div class="modal-header bg-primary text-white">
+                <div class="modal-header modal-header-custom">
                     <h5 class="modal-title" id="usuarioModalLabel">
                         <i class="fas fa-user-circle me-2"></i>Resumen del Usuario
                     </h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body" id="modalContent">
-                    <!-- contenido dinámicas -->
+                <div class="modal-body modal-body-custom" id="modalContent">
+                    <!-- contenido dinámico -->
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                    <button type="button" class="btn btn-danger" id="btnImprimirModal" onclick="imprimirDesdeModal()">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i> Cerrar
+                    </button>
+                    <button type="button" class="btn btn-danger-custom" onclick="imprimirDesdeModal()">
                         <i class="fas fa-print me-1"></i> Imprimir PDF
                     </button>
-                    <button type="button" class="btn btn-success" id="btnExcelModal" onclick="excelDesdeModal()">
+                    <button type="button" class="btn btn-success-custom" onclick="excelDesdeModal()">
                         <i class="fas fa-file-excel me-1"></i> Exportar Excel
                     </button>
                 </div>
@@ -241,241 +594,61 @@
         </div>
     </div>
 
-    <div class="container-fluid">
-        <div class="row">
-            <!-- Sidebar -->
-            <div class="col-md-2 sidebar p-3">
-                <div class="text-center mb-4">
-                    <div class="avatar mx-auto mb-3">SG</div>
-                    <h5 class="text-white">Sistema de Gestión</h5>
-                    <p class="text-muted small">PDF y Excel</p>
-                </div>
-                
-                <nav class="nav flex-column">
-                    <div class="nav-link-custom active" onclick="showSection('buscar')">
-                        <i class="fas fa-search"></i> Buscar Usuario
-                    </div>
-                    <div class="nav-link-custom" onclick="showSection('opciones')">
-                        <i class="fas fa-file-alt"></i> Opciones de Informe
-                    </div>
-                    <div class="nav-link-custom" onclick="showSection('listar')">
-                        <i class="fas fa-users"></i> Listar Todos
-                    </div>
-                </nav>
-                
-                <div class="mt-4 p-3" style="background: rgba(255,255,255,0.1); border-radius: 10px;">
-                    <small class="text-white-50">Django + MySQL</small>
-                </div>
-            </div>
-            
-            <!-- Main Content -->
-            <div class="col-md-10 main-content">
-                <div class="card-spa">
-                    <!-- Header -->
-                    <div class="card-header bg-white p-4 border-0">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h3 class="mb-0" id="sectionTitle">Buscar Usuario</h3>
-                                <p class="text-muted mb-0" id="sectionSubtitle">Buscar Usuario: Ingrese ID o Nombre para generar informes PDF/Excel con gráficos</p>
-                            </div>
-                            <div class="text-end">
-                                <span class="badge bg-primary fs-6">v1.0</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Content -->
-                    <div class="card-body p-4">
-                        
-                        <!-- Section: Buscar -->
-                        <div id="section-buscar" class="menu-section active">
-                            <!-- Búsqueda por ID -->
-                            <div class="card mb-4">
-                                <div class="card-header bg-primary text-white">
-                                    <h5 class="mb-0"><i class="fas fa-hashtag me-2"></i>Buscar por ID</h5>
-                                </div>
-                                <div class="card-body">
-                                    <div class="search-box mb-3">
-                                        <i class="fas fa-search search-icon"></i>
-                                        <input type="number" id="buscarId" class="form-control" placeholder="Ingrese ID de usuario (ej: 1, 2, 3...)" min="1">
-                                    </div>
-                                    <button class="btn btn-primary" onclick="buscarUsuario()">
-                                        <i class="fas fa-search me-2"></i> Buscar por ID
-                                    </button>
-                                </div>
-                            </div>
-                            
-                            <!-- Búsqueda por Nombre -->
-                            <div class="card">
-                                <div class="card-header bg-success text-white">
-                                    <h5 class="mb-0"><i class="fas fa-user me-2"></i>Buscar por Nombre</h5>
-                                </div>
-                                <div class="card-body">
-                                    <div class="search-box mb-3">
-                                        <i class="fas fa-font search-icon"></i>
-                                        <input type="text" id="buscarNombre" class="form-control" placeholder="Ingrese nombre del usuario (ej: Juan, María...)">
-                                    </div>
-                                    <button class="btn btn-success" onclick="buscarPorNombre()">
-                                        <i class="fas fa-search me-2"></i> Buscar por Nombre
-                                    </button>
-                                </div>
-                            </div>
-                            
-                            {% if error %}
-                            <div class="alert alert-danger mt-3">
-                                <i class="fas fa-exclamation-triangle me-2"></i>{{ error }}
-                            </div>
-                            {% endif %}
-                            
-                            {% if usuarios_encontrados %}
-                            <div class="mt-4">
-                                <h5>Resultados de búsqueda: "{{ busqueda_nombre }}"</h5>
-                                <p class="text-muted">{{ usuarios_encontrados|length }} usuario(s) encontrado(s)</p>
-                                <div class="table-responsive">
-                                    <table class="table table-hover">
-                                        <thead class="bg-primary text-white">
-                                            <tr>
-                                                <th>ID</th>
-                                                <th>Nombre</th>
-                                                <th>Correo</th>
-                                                <th>Teléfono</th>
-                                                <th>Acciones</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {% for u in usuarios_encontrados %}
-                                            <tr>
-                                                <td>{{ u.id }}</td>
-                                                <td>{{ u.nombre }}</td>
-                                                <td>{{ u.correo }}</td>
-                                                <td>{{ u.telefono|default:"N/A" }}</td>
-                                                <td>
-                                                    <a href="/generar_pdf/{{ u.id }}/" class="btn btn-sm btn-danger">
-                                                        <i class="fas fa-file-pdf"></i>
-                                                    </a>
-                                                    <a href="/generar_excel/{{ u.id }}/" class="btn btn-sm btn-success">
-                                                        <i class="fas fa-file-excel"></i>
-                                                    </a>
-                                                </td>
-                                            </tr>
-                                            {% endfor %}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                            {% endif %}
-                            
-                            <div id="resultadoBusqueda"></div>
-                        </div>
-                        
-                        <!-- Section: Opciones -->
-                        <div id="section-opciones" class="menu-section">
-                            <div class="alert alert-info">
-                                <i class="fas fa-info-circle me-2"></i>
-                                Seleccione el tipo de informe que desea generar para todos los usuarios
-                            </div>
-                            
-                            <div class="row g-4">
-                                <div class="col-md-6">
-                                    <div class="card h-100 border-0 shadow-sm">
-                                        <div class="card-body text-center py-5">
-                                            <i class="fas fa-file-pdf fa-4x text-danger mb-4"></i>
-                                            <h4>Generar PDF</h4>
-                                            <p class="text-muted">Exportar todos los usuarios a documento PDF con gráficos estadísticos</p>
-                                            <button class="btn btn-option pdf" onclick="generarPDFTodos()">
-                                                <i class="fas fa-download me-2"></i> Descargar PDF
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="card h-100 border-0 shadow-sm">
-                                        <div class="card-body text-center py-5">
-                                            <i class="fas fa-file-excel fa-4x text-success mb-4"></i>
-                                            <h4>Generar Excel</h4>
-                                            <p class="text-muted">Exportar todos los usuarios a hoja de cálculo con gráficos</p>
-                                            <button class="btn btn-option excel" onclick="generarExcelTodos()">
-                                                <i class="fas fa-download me-2"></i> Descargar Excel
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Section: Listar -->
-                        <div id="section-listar" class="menu-section">
-                            <div class="d-flex justify-content-between align-items-center mb-4">
-                                <h5 class="mb-0">Listado de Todos los Usuarios</h5>
-                                <div>
-                                    <button class="btn btn-danger btn-sm me-2" onclick="generarPDFTodos()">
-                                        <i class="fas fa-file-pdf me-1"></i> PDF
-                                    </button>
-                                    <button class="btn btn-success btn-sm" onclick="generarExcelTodos()">
-                                        <i class="fas fa-file-excel me-1"></i> Excel
-                                    </button>
-                                </div>
-                            </div>
-                            
-                            <div class="table-responsive">
-                                <table class="table table-user table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>ID</th>
-                                            <th>Nombre</th>
-                                            <th>Correo</th>
-                                            <th>Teléfono</th>
-                                            <th>Dirección</th>
-                                            <th>Fecha</th>
-                                            <th>Acciones</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="tablaUsuarios">
-                                        <tr>
-                                            <td colspan="7" class="text-center py-5">
-                                                <div class="spinner-border text-primary" role="status">
-                                                    <span class="visually-hidden">Cargando...</span>
-                                                </div>
-                                                <p class="mt-2 text-muted">Cargando usuarios...</p>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                        
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
+    <!-- Scripts -->
     <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
     <script src="{% static 'js/sweetalert2.min.js' %}"></script>
     <script>
-        let usuarioActual = null;
-        
-        function showSection(section) {
-            document.querySelectorAll('.menu-section').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('.nav-link-custom').forEach(n => n.classList.remove('active'));
+        let usuarioGlobalId = null;
+        let menuAbierto = false;
+
+        // Toggle Menú Principal
+        function toggleMenu() {
+            const panels = document.querySelectorAll('.accordion-panel');
+            const btn = document.getElementById('menuToggle');
             
-            document.getElementById('section-' + section).classList.add('active');
-            event.target.closest('.nav-link-custom').classList.add('active');
+            panels.forEach(panel => {
+                panel.classList.toggle('show');
+            });
             
-            const titles = {
-                'buscar': ['Buscar Usuario', 'Ingrese el ID del usuario para generar informes'],
-                'opciones': ['Opciones de Informe', 'Genere informes en PDF o Excel de todos los usuarios'],
-                'listar': ['Listar Todos los Usuarios', 'Visualice y exporte todos los usuarios registrados']
-            };
-            
-            document.getElementById('sectionTitle').textContent = titles[section][0];
-            document.getElementById('sectionSubtitle').textContent = titles[section][1];
-            
-            if (section === 'listar') {
-                cargarUsuarios();
-            }
+            menuAbierto = !menuAbierto;
+            const icon = btn.querySelector('i');
+            icon.className = menuAbierto ? 'fas fa-times' : 'fas fa-bars';
         }
-        
+
+        // Toggle Acordeón
+        function toggleAccordion(header) {
+            const content = header.nextElementSibling;
+            const icon = header.querySelector('.accordion-icon');
+            const isOpen = content.classList.contains('show');
+
+            document.querySelectorAll('.accordion-content.show').forEach(el => {
+                if (el !== content) {
+                    el.classList.remove('show');
+                    el.previousElementSibling.classList.remove('active');
+                    el.previousElementSibling.querySelector('.accordion-icon').classList.remove('rotate');
+                }
+            });
+
+            header.classList.toggle('active');
+            content.classList.toggle('show');
+            icon.classList.toggle('rotate');
+        }
+
+        // Mostrar sección
+        function showSection(section) {
+            document.getElementById('card-buscar-id').style.display = 'none';
+            document.getElementById('card-buscar-nombre').style.display = 'none';
+            
+            if(section === 'buscar-id') {
+                document.getElementById('card-buscar-id').style.display = 'block';
+            } else if(section === 'buscar-nombre') {
+                document.getElementById('card-buscar-nombre').style.display = 'block';
+            }
+            
+            toggleMenu();
+        }
+
+        // Buscar por ID
         function buscarUsuario() {
             const id = document.getElementById('buscarId').value;
             
@@ -484,12 +657,11 @@
                     icon: 'error',
                     title: 'Error',
                     text: 'Por favor ingrese un ID válido',
-                    confirmButtonColor: '#3498db'
+                    confirmButtonColor: '#0066cc'
                 });
                 return;
             }
             
-            // Mostrar loading
             Swal.fire({
                 title: 'Buscando...',
                 text: 'Buscando usuario con ID: ' + id,
@@ -497,7 +669,6 @@
                 didOpen: () => { Swal.showLoading(); }
             });
             
-            // Enviar formulario directamente
             const form = document.createElement('form');
             form.method = 'POST';
             form.action = '{% url "index" %}';
@@ -517,7 +688,8 @@
             document.body.appendChild(form);
             form.submit();
         }
-        
+
+        // Buscar por Nombre
         function buscarPorNombre() {
             const nombre = document.getElementById('buscarNombre').value;
             
@@ -526,12 +698,11 @@
                     icon: 'error',
                     title: 'Error',
                     text: 'Por favor ingrese un nombre para buscar',
-                    confirmButtonColor: '#27ae60'
+                    confirmButtonColor: '#00a86b'
                 });
                 return;
             }
             
-            // Mostrar loading
             Swal.fire({
                 title: 'Buscando...',
                 text: 'Buscando: ' + nombre,
@@ -539,7 +710,6 @@
                 didOpen: () => { Swal.showLoading(); }
             });
             
-            // Enviar formulario directamente
             const form = document.createElement('form');
             form.method = 'POST';
             form.action = '{% url "index" %}';
@@ -559,63 +729,46 @@
             document.body.appendChild(form);
             form.submit();
         }
-        
-        let usuarioGlobalId = null;
 
+        // Mostrar usuario en modal
         function mostrarUsuario(usuario) {
             usuarioGlobalId = usuario.id;
             const inicial = usuario.nombre.charAt(0).toUpperCase();
-            const fecha = new Date().toLocaleDateString('es-ES');
             
-            // Generar contenido del modal
             const modalContent = `
                 <div class="row">
                     <div class="col-md-4 text-center">
-                        <div class="avatar-lg mx-auto mb-3" style="width: 100px; height: 100px; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 40px; color: white;">
-                            ${inicial}
-                        </div>
+                        <div class="user-avatar-lg mx-auto mb-3">${inicial}</div>
                         <h4>${usuario.nombre}</h4>
                         <span class="badge bg-primary">ID: ${usuario.id}</span>
                     </div>
                     <div class="col-md-8">
-                        <table class="table table-sm table-borderless">
-                            <tr>
-                                <td><strong><i class="fas fa-envelope me-2 text-primary"></i>Correo:</strong></td>
-                                <td>${usuario.correo}</td>
-                            </tr>
-                            <tr>
-                                <td><strong><i class="fas fa-phone me-2 text-success"></i>Teléfono:</strong></td>
-                                <td>${usuario.telefono}</td>
-                            </tr>
-                            <tr>
-                                <td><strong><i class="fas fa-map-marker-alt me-2 text-warning"></i>Dirección:</strong></td>
-                                <td>${usuario.direccion}</td>
-                            </tr>
-                            <tr>
-                                <td><strong><i class="fas fa-calendar me-2 text-info"></i>Fecha de Registro:</strong></td>
-                                <td>${usuario.fecha}</td>
-                            </tr>
+                        <table class="table table-borderless">
+                            <tr><td><strong><i class="fas fa-envelope me-2 text-primary"></i>Correo:</strong></td><td>${usuario.correo}</td></tr>
+                            <tr><td><strong><i class="fas fa-phone me-2 text-success"></i>Teléfono:</strong></td><td>${usuario.telefono}</td></tr>
+                            <tr><td><strong><i class="fas fa-map-marker-alt me-2 text-warning"></i>Dirección:</strong></td><td>${usuario.direccion}</td></tr>
+                            <tr><td><strong><i class="fas fa-calendar me-2 text-info"></i>Fecha de Registro:</strong></td><td>${usuario.fecha}</td></tr>
                         </table>
                     </div>
                 </div>
                 <hr>
                 <div class="row text-center">
                     <div class="col-md-4">
-                        <div class="stat-box p-3 bg-primary bg-opacity-10 rounded">
+                        <div class="p-3 bg-primary bg-opacity-10 rounded">
                             <i class="fas fa-chart-bar fa-2x text-primary"></i>
                             <p class="mb-0 mt-2"><strong>Barras</strong></p>
-                            <small class="text-muted">Distribución por mes</small>
+                            <small class="text-muted">Por mes</small>
                         </div>
                     </div>
                     <div class="col-md-4">
-                        <div class="stat-box p-3 bg-warning bg-opacity-10 rounded">
+                        <div class="p-3 bg-warning bg-opacity-10 rounded">
                             <i class="fas fa-chart-pie fa-2x text-warning"></i>
                             <p class="mb-0 mt-2"><strong>Torta</strong></p>
                             <small class="text-muted">Por inicial</small>
                         </div>
                     </div>
                     <div class="col-md-4">
-                        <div class="stat-box p-3 bg-success bg-opacity-10 rounded">
+                        <div class="p-3 bg-success bg-opacity-10 rounded">
                             <i class="fas fa-dot-circle fa-2x text-success"></i>
                             <p class="mb-0 mt-2"><strong>Dispersión</strong></p>
                             <small class="text-muted">Posición real</small>
@@ -626,133 +779,77 @@
             
             document.getElementById('modalContent').innerHTML = modalContent;
             
-            // Mostrar modal
             const modal = new bootstrap.Modal(document.getElementById('usuarioModal'));
             modal.show();
-            
-            // También mostrar en la página
-            document.getElementById('resultadoBusqueda').innerHTML = `
-                <div class="alert alert-success">
-                    <i class="fas fa-check-circle me-2"></i>
-                    <strong>Usuario encontrado:</strong> ${usuario.nombre} (ID: ${usuario.id})
-                    <button class="btn btn-sm btn-primary float-end" data-bs-toggle="modal" data-bs-target="#usuarioModal">
-                        Ver Detalles
-                    </button>
-                </div>
-            `;
+        }
+
+        // Funciones de descarga
+        function descargarPDF(id) {
+            Swal.fire({ title: 'Generando PDF...', timer: 2000, timerProgressBar: true, didOpen: () => { Swal.showLoading() } })
+            .then(() => { window.location.href = '/generar_pdf/' + id + '/'; });
+        }
+
+        function descargarExcel(id) {
+            Swal.fire({ title: 'Generando Excel...', timer: 2000, timerProgressBar: true, didOpen: () => { Swal.showLoading() } })
+            .then(() => { window.location.href = '/generar_excel/' + id + '/'; });
         }
 
         function imprimirDesdeModal() {
-            if (usuarioGlobalId) {
-                window.open('/generar_pdf/' + usuarioGlobalId + '/', '_blank');
-            }
+            if (usuarioGlobalId) window.open('/generar_pdf/' + usuarioGlobalId + '/', '_blank');
         }
 
         function excelDesdeModal() {
-            if (usuarioGlobalId) {
-                window.location.href = '/generar_excel/' + usuarioGlobalId + '/';
-            }
+            if (usuarioGlobalId) window.location.href = '/generar_excel/' + usuarioGlobalId + '/';
         }
-        
-        function descargarPDF(id) {
-            Swal.fire({
-                title: 'Generando PDF',
-                html: 'El documento PDF está siendo generado...',
-                timer: 2000,
-                timerProgressBar: true,
-                didOpen: () => { Swal.showLoading(); }
-            }).then(() => {
-                window.location.href = '/generar_pdf/' + id + '/';
-            });
-        }
-        
-        function descargarExcel(id) {
-            Swal.fire({
-                title: 'Generando Excel',
-                html: 'El documento Excel está siendo generado...',
-                timer: 2000,
-                timerProgressBar: true,
-                didOpen: () => { Swal.showLoading(); }
-            }).then(() => {
-                window.location.href = '/generar_excel/' + id + '/';
-            });
-        }
-        
-        function imprimirPagina(id) {
-            Swal.fire({
-                title: 'Preparando impresión',
-                html: 'Abriendo ventana de impresión...',
-                timer: 1500,
-                timerProgressBar: true,
-                didOpen: () => { Swal.showLoading(); }
-            }).then(() => {
-                window.open('/generar_pdf/' + id + '/', '_blank');
-            });
-        }
-        
+
         function generarPDFTodos() {
-            Swal.fire({
-                title: 'Generando PDF',
-                html: 'Generando reporte de todos los usuarios...',
-                timer: 2500,
-                timerProgressBar: true,
-                didOpen: () => { Swal.showLoading(); }
-            }).then(() => {
-                window.location.href = '{% url "generar_pdf_todos" %}';
-            });
+            Swal.fire({ title: 'Generando PDF General...', timer: 2500, timerProgressBar: true, didOpen: () => { Swal.showLoading() } })
+            .then(() => { window.location.href = '{% url "generar_pdf_todos" %}'; });
+            toggleMenu();
         }
-        
+
         function generarExcelTodos() {
-            Swal.fire({
-                title: 'Generando Excel',
-                html: 'Generando reporte de todos los usuarios...',
-                timer: 2500,
-                timerProgressBar: true,
-                didOpen: () => { Swal.showLoading(); }
-            }).then(() => {
-                window.location.href = '{% url "generar_excel_todos" %}';
-            });
+            Swal.fire({ title: 'Generando Excel General...', timer: 2500, timerProgressBar: true, didOpen: () => { Swal.showLoading() } })
+            .then(() => { window.location.href = '{% url "generar_excel_todos" %}'; });
+            toggleMenu();
         }
-        
-        function cargarUsuarios() {
-            fetch('{% url "lista_usuarios" %}')
-            .then(response => response.text())
-            .then(html => {
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(html, 'text/html');
-                const tbody = doc.querySelector('tbody');
-                if (tbody) {
-                    document.getElementById('tablaUsuarios').innerHTML = tbody.innerHTML;
-                }
-            });
+
+        function cargarLista() {
+            window.location.href = '{% url "lista_usuarios" %}';
+            toggleMenu();
         }
-        
+
+        // Enter key events
         document.getElementById('buscarId').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                buscarUsuario();
-            }
+            if (e.key === 'Enter') buscarUsuario();
         });
         
         document.getElementById('buscarNombre').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                buscarPorNombre();
-            }
+            if (e.key === 'Enter') buscarPorNombre();
         });
-        
+
         // Mostrar modal automáticamente si hay usuario
         {% if usuario %}
         window.addEventListener('load', function() {
-            const usuarioData = {
+            mostrarUsuario({
                 id: '{{ usuario.id }}',
                 nombre: '{{ usuario.nombre }}',
                 correo: '{{ usuario.correo }}',
                 telefono: '{{ usuario.telefono }}',
                 direccion: '{{ usuario.direccion }}',
                 fecha: '{{ usuario.fecha_creacion }}'
-            };
-            mostrarUsuario(usuarioData);
+            });
         });
         {% endif %}
+
+        // Cerrar menú al hacer clic fuera
+        document.addEventListener('click', function(event) {
+            const menu = document.querySelector('.floating-menu');
+            const toggle = document.getElementById('menuToggle');
+            if (!menu.contains(event.target) && event.target !== toggle && menuAbierto) {
+                toggleMenu();
+            }
+        });
     </script>
 </body>
 </html>

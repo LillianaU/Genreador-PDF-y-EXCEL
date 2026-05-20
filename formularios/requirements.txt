@@ -1,0 +1,35 @@
+# ==========================================
+# REQUERIMIENTOS DEL PROYECTO
+# Sistema de Generación de PDF y Excel
+# ==========================================
+
+# Framework Web
+Django==4.2.28
+
+# Base de Datos
+mysqlclient==2.2.4
+
+# Generación de PDF
+reportlab==4.2.5
+
+# Generación de Excel
+openpyxl==3.1.5
+
+# Procesamiento de imágenes (para logo)
+Pillow==10.4.0
+
+# ==========================================
+# PARA DESARROLLO (opcional)
+# ==========================================
+# django-debug-toolbar==4.4.6
+# pytest==8.3.3
+# pytest-django==4.9.0
+
+# ==========================================
+# INSTALACIÓN
+# ==========================================
+# pip install -r requirements.txt
+#
+# En Windows puede requerir Visual C++ Build Tools
+# para mysqlclient
+# ==========================================

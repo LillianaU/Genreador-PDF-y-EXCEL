@@ -5,13 +5,36 @@ SISTEMA DE GENERACIÓN DE PDF Y EXCEL - DJANGO + MySQL
 
 Este módulo contiene las vistas del sistema de gestión de usuarios.
 Proporciona funcionalidades para buscar usuarios, generar reportes
-en PDF y Excel con gráficos estadísticos.
+en PDF y Excel con gráficos estadísticos estilo Chart.js.
 
-Patrones de Diseño Utilizados:
-- MVC (Model-View-Controller) - Estructura de Django
-- Patrón de Servicio - Lógica de negocio encapsulada
-- Factory Method - Creación de documentos PDF/Excel
-- Repository - Acceso a datos mediante cursor
+PATRONES DE DISEÑO UTILIZADOS:
+==============================
+
+1. MVC (Model-View-Controller) - Estructura de Django
+   - Model: Base de datos MySQL (tabla usuarios)
+   - View: Templates HTML (index.html, lista.html)
+   - Controller: Funciones de views.py
+
+2. FACTORY METHOD (Patrón Fábrica)
+   Ubicación: funciones generar_pdf(), generar_excel()
+   - Creación de documentos PDF mediante SimpleDocTemplate
+   - Creación de documentos Excel mediante Workbook
+   - Encapsula la lógica de creación de cada tipo de documento
+
+3. REPOSITORY PATTERN (Patrón Repositorio)
+   Ubicación: conexión con connection.cursor()
+   - Abstrae el acceso a datos MySQL
+   - Consultas SQL centralizadas en las funciones de vista
+   - Métodos: get_by_id(), get_all(), get_stats()
+
+4. SERVICE LAYER (Patrón de Servicio)
+   - Lógica de negocio encapsulada en funciones
+   - generar_pdf(): servicio de generación PDF
+   - generar_excel(): servicio de generación Excel
+
+5. TEMPLATE METHOD (Patrón Método Plantilla)
+   - Estructura fija para generar documentos
+   - Pasos: preparar estilos → agregar contenido → agregar gráficos → construir
 
 Autor: Sistema de Gestión
 Fecha: 2026
