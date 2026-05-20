@@ -4,11 +4,17 @@
 
 ---
 
-## 1. Patrones de Arquitectura
+## 1. Introducción
 
-### 1.1 MVC (Model-View-Controller)
+Este documento describe los patrones de diseño utilizados en el proyecto, implementados en Python/Django para la generación de informes PDF y Excel con gráficos estadísticos.
 
-Django implementa el patrón MVC de forma natural:
+---
+
+## 2. Patrones de Arquitectura
+
+### 2.1 MVC (Model-View-Controller)
+
+**Descripción**: Patrón implementado por Django naturalmente.
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -21,7 +27,7 @@ Django implementa el patrón MVC de forma natural:
 │   │  usuarios   │            │   Bootstrap     │          │
 │   └─────────────┘            └─────────────────┘          │
 │         ↑                          ↑                       │
-│         │    connection.cursor()   │  render()             │
+│         │    connection.cursor()   │  render()           │
 │         └──────────────────────────┘                       │
 │                          ↓                                  │
 │                   CONTROLLER                              │
@@ -33,8 +39,7 @@ Django implementa el patrón MVC de forma natural:
 └─────────────────────────────────────────────────────────────┘
 ```
 
-**Implementación en el código:**
-
+**Implementación**:
 ```python
 # MODEL - Acceso a datos MySQL
 with connection.cursor() as cursor:
@@ -50,35 +55,9 @@ def generar_pdf(request, id_usuario):
 
 ---
 
-### 1.2 Patrón de Servicio (Service Layer)
+### 2.2 Factory Method (Patrón Fábrica)
 
-Las funciones de views actúan como servicios:
-
-```python
-class GeneradorPDF:
-    """Servicio de generación de PDF"""
-    
-    @staticmethod
-    def generar(informe):
-        # Lógica de generación
-        doc.build(elements)
-        return response
-
-class GeneradorExcel:
-    """Servicio de generación de Excel"""
-    
-    @staticmethod
-    def generar(informe):
-        # Lógica de generación
-        wb.save(response)
-        return response
-```
-
----
-
-### 1.3 Factory Method
-
-Creación de objetos pdf y excel encapsulada:
+**Descripción**: Encapsula la creación de objetos PDF/Excel sin especificar clases concretas.
 
 ```
 ┌─────────────────────────────────────────────┐
@@ -87,31 +66,66 @@ Creación de objetos pdf y excel encapsulada:
 │                                             │
 │   generar_pdf() ─────────────────────────►  │
 │       │                                      │
-│       ├── Crea SimpleDocTemplate            │
+│       ├── Crea SimpleDocTemplate           │
 │       ├── Configura estilos                 │
 │       ├── Genera tablas                     │
-│       ├── Genera gráficos                   │
+│       ├── Genera gráficos (Barras,Torta)   │
 │       └── Retorna HttpResponse              │
 │                                             │
 │   generar_excel() ─────────────────────────► │
 │       │                                      │
 │       ├── Crea Workbook                     │
-│       ├── Crea hojas                        │
-│       ├── Genera gráficos                   │
+│       ├── Crea hojas múltiples               │
+│       ├── Genera gráficos interactivos      │
 │       └── Retorna HttpResponse              │
 │                                             │
 └─────────────────────────────────────────────┘
 ```
 
+**Implementación en views.py**:
+```python
+def generar_pdf(request, id_usuario):
+    """FÁBRICA de documentos PDF"""
+    response = HttpResponse(content_type='application/pdf')
+    doc = SimpleDocTemplate(response, pagesize=letter, ...)
+    elements = []
+    # Agregar logo, estilos, datos, gráficos...
+    doc.build(elements)
+    return response
+
+def generar_excel(request, id_usuario):
+    """FÁBRICA de documentos Excel"""
+    wb = Workbook()
+    ws = wb.active
+    # Agregar datos, hojas, gráficos...
+    wb.save(response)
+    return response
+```
+
 ---
 
-### 1.4 Repository Pattern
+### 2.3 Repository Pattern (Patrón Repositorio)
 
-Acceso a datos centralizado:
+**Descripción**: Abstrae el acceso a datos, centralizando consultas SQL.
 
+```
+┌─────────────────────────────────────────────┐
+│           REPOSITORY PATTERN                │
+├─────────────────────────────────────────────┤
+│                                             │
+│   View ──────► Repository ──────► MySQL   │
+│                     │                       │
+│         ┌──────────┼──────────┐            │
+│         │          │          │            │
+│    get_by_id() get_all() get_stats()      │
+│                                             │
+└─────────────────────────────────────────────┘
+```
+
+**Implementación**:
 ```python
 class UsuarioRepository:
-    """Repositorio de usuarios"""
+    """Repositório de usuarios - funciones en views.py"""
     
     @staticmethod
     def get_by_id(id_usuario):
@@ -128,241 +142,164 @@ class UsuarioRepository:
     @staticmethod
     def get_stats():
         with connection.cursor() as cursor:
-            cursor.execute("SELECT COUNT(*) as total FROM usuarios")
+            cursor.execute("SELECT COUNT(*) FROM usuarios")
             return cursor.fetchone()
 ```
 
 ---
 
-## 2. Patrones de Diseño de Software
+### 2.4 Service Layer (Patrón de Servicio)
 
-### 2.1 Singleton
+**Descripción**: Lógica de negocio encapsulada en servicios independientes.
 
-Configuración de Django como singleton:
+```
+┌─────────────────────────────────────────────┐
+│           SERVICE LAYER                     │
+├─────────────────────────────────────────────┤
+│                                             │
+│  ┌─────────────┐  ┌─────────────┐          │
+│  │ PDFService │  │ExcelService │          │
+│  ├─────────────┤  ├─────────────┤          │
+│  │ +generar() │  │ +generar()  │          │
+│  │ +agregar() │  │ +agregar()  │          │
+│  │ +graficos() │  │ +graficos() │          │
+│  └─────────────┘  └─────────────┘          │
+│       │                 │                   │
+│       └────────┬────────┘                    │
+│                ▼                             │
+│         HttpResponse                         │
+│                                             │
+└─────────────────────────────────────────────┘
+```
 
+**Implementación en views.py**:
 ```python
-# settings.py - Configuración única
-SECRET_KEY = 'django-insecure-...'
-DEBUG = True
-ALLOWED_HOSTS = []
+class PDFService:
+    """Servicio de generación de PDF"""
+    
+    @staticmethod
+    def generar(usuario_id):
+        # 1. Obtener datos
+        usuario = obtener_usuario(usuario_id)
+        estadisticas = obtener_estadisticas()
+        
+        # 2. Crear documento
+        doc = SimpleDocTemplate(...)
+        
+        # 3. Agregar contenido
+        elements = []
+        elements.append(Paragraph("INFORME", title_style))
+        elements.append(crear_tabla_datos(usuario))
+        elements.append(crear_grafico_barras(estadisticas))
+        elements.append(crear_grafico_torta(estadisticas))
+        
+        # 4. Retornar
+        doc.build(elements)
+        return response
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        # Configuración única de base de datos
-    }
-}
+class ExcelService:
+    """Servicio de generación de Excel"""
+    
+    @staticmethod
+    def generar(usuario_id):
+        # Similar al servicio PDF
+        pass
 ```
 
 ---
 
-### 2.2 Strategy Pattern
+### 2.5 Template Method (Patrón Método Plantilla)
 
-Diferentes estrategias de exportación:
+**Descripción**: Define el esqueleto de un algoritmo, delegando pasos específicos a subclases.
 
 ```
-┌─────────────────────────────┐
-│      EXPORT STRATEGY        │
-├─────────────────────────────┤
-│                             │
-│  + export()                 │
-│         │                   │
-│    ┌────┴────┐              │
-│    ▼         ▼              │
-│ ┌──────┐  ┌──────┐         │
-│ │ PDF  │  │Excel │         │
-│ │Strategy│ │Strategy│        │
-│ └──────┘  └──────┘         │
-│    │         │              │
-│    ▼         ▼              │
-│ ReportLab  openpyxl         │
-│                             │
-└─────────────────────────────┘
+┌─────────────────────────────────────────────┐
+│          TEMPLATE METHOD                    │
+├─────────────────────────────────────────────┤
+│                                             │
+│   generar_documento()                       │
+│   ┌────────────────────────────────────┐    │
+│   │ 1. preparar_estilos()      ──────┼────│► inheritance implícita en Python
+│   │ 2. agregar_encabezado()           │    │
+│   │ 3. agregar_contenido()            │    │
+│   │ 4. agregar_graficos()             │    │
+│   │ 5. agregar_pie()                  │    │
+│   │ 6. construir()                    │    │
+│   └────────────────────────────────────┘    │
+│                                             │
+│   PDF: usa ReportLab (SimpleDocTemplate)    │
+│   Excel: usa openpyxl (Workbook)            │
+│                                             │
+└─────────────────────────────────────────────┘
 ```
 
----
-
-### 2.3 Template Method
-
-Estructura de generación de documentos:
-
+**Implementación**:
 ```python
-class DocumentoGenerador:
-    """Template Method para generación de documentos"""
+def generar_pdf(request, id_usuario):
+    """MÉTODO PLANTILLA para PDF"""
     
-    def generar(self, datos):
-        self.preparar_estilos()
-        self.agregar_encabezado(datos)
-        self.agregar_contenido(datos)
-        self.agregar_graficos(datos)
-        self.agregar_pie()
-        return self.construir()
+    # 1. Preparar estilos (Step 1)
+    styles = getSampleStyleSheet()
+    title_style = ParagraphStyle(...)
     
-    def preparar_estilos(self):
-        pass  # Implementación específica
+    # 2. Agregar encabezado (Step 2)
+    elements.append(Paragraph("INFORME", title_style))
     
-    def agregar_encabezado(self, datos):
-        pass  # Implementación específica
-
-class PDFGenerador(DocumentoGenerador):
-    def preparar_estilos(self):
-        # Estilos específicos para PDF
+    # 3. Agregar contenido (Step 3)
+    data = [['Campo', 'Valor'], ['ID', str(usuario['id'])]]
+    table = Table(data)
     
-    def construir(self):
-        return doc.build(elements)
-
-class ExcelGenerador(DocumentoGenerador):
-    def preparar_estilos(self):
-        # Estilos específicos para Excel
+    # 4. Agregar gráficos (Step 4)
+    elements.append(crear_grafico_barras())
+    elements.append(crear_grafico_torta())
+    elements.append(crear_grafico_dispersion())
     
-    def construir(self):
-        return wb.save(response)
+    # 5. Agregar pie (Step 5)
+    elements.append(Paragraph("Sistema Django + MySQL", footer_style))
+    
+    # 6. Construir (Step 6)
+    doc.build(elements)
+    return response
 ```
 
 ---
 
-## 3. Patrones de Presentación
-
-### 3.1 SPA (Single Page Application)
-
-Interfaz de una sola página:
+## 3. Diagrama de Flujo de Datos
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                    INTERFAZ SPA                             │
-├─────────────────────────────────────────────────────────────┤
-│  ┌─────────┐  ┌──────────────────────────────────────────┐  │
-│  │ SIDEBAR │  │              MAIN CONTENT               │  │
-│  │         │  │                                          │  │
-│  │ [Buscar]│  │  ┌────────────────────────────────────┐  │  │
-│  │ [Opciones]│ │  │         SECCIONES                 │  │  │
-│  │ [Listar] │  │  │  - buscar (default)                │  │  │
-│  │         │  │  │  - opciones                        │  │  │
-│  │         │  │  │  - listar                          │  │  │
-│  └─────────┘  │  └────────────────────────────────────┘  │  │
-│               └──────────────────────────────────────────┘  │
-└─────────────────────────────────────────────────────────────┘
+USUARIO → PETICIÓN HTTP → VIEW (Controller)
+                              │
+                              ├─► Repository (MySQL)
+                              │       │
+                              │       └─► TABLA usuarios
+                              │
+                              ├─► Service Layer
+                              │       │
+                              │       ├─► PDF Service
+                              │       │       └─► ReportLab (PDF)
+                              │       │
+                              │       └─► Excel Service
+                              │               └─► openpyxl (Excel)
+                              │
+                              └─► VIEW (Template)
+                                      └─► HTML + Bootstrap
 ```
 
 ---
 
-### 3.2 Observador
-
-Eventos en la interfaz:
-
-```javascript
-// Observador de eventos
-document.getElementById('buscarForm').addEventListener('submit', function(e) {
-    // Notifica al observador (SweetAlert)
-    Swal.fire({
-        title: 'Buscando...',
-        showLoaderOnLoading: true
-    });
-});
-```
-
----
-
-## 4. Diagramas de Flujo
-
-### 4.1 Flujo de Generación de PDF
-
-```
-                    ┌─────────────────┐
-                    │  Solicitud PDF  │
-                    │ /generar_pdf/1  │
-                    └────────┬────────┘
-                             │
-                    ┌────────▼────────┐
-                    │ Validar ID     │
-                    └────────┬────────┘
-                             │
-              ┌──────────────┴──────────────┐
-              │                             │
-    ┌─────────▼─────────┐        ┌──────────▼──────────┐
-    │  Usuario existe  │        │   Usuario no existe   │
-    └────────┬────────┘        └──────────┬───────────┘
-              │                            │
-    ┌─────────▼────────────────────────────▼──────────┐
-    │              CONSULTAR DATOS                    │
-    │  - Datos del usuario                           │
-    │  - Estadísticas globales                       │
-    │  - Distribución por mes                       │
-    │  - Distribución por inicial                   │
-    └────────────────────┬──────────────────────────┘
-                         │
-              ┌──────────▼────────────┐
-              │  CREAR DOCUMENTO     │
-              │  - Logo              │
-              │  - Estilos           │
-              │  - Tabla datos       │
-              │  - Gráfico barras    │
-              │  - Gráfico torta     │
-              │  - Estadísticas      │
-              └──────────┬────────────┘
-                         │
-              ┌──────────▼──────────┐
-              │  RETORNAR PDF       │
-              │  HttpResponse      │
-              └─────────────────────┘
-```
-
-### 4.2 Flujo de Generación de Excel
-
-```
-                    ┌──────────────────┐
-                    │ Solicitud Excel │
-                    │ /generar_excel/1│
-                    └────────┬────────┘
-                             │
-                    ┌────────▼────────┐
-                    │ Validar ID     │
-                    └────────┬────────┘
-                             │
-              ┌──────────────┴──────────────┐
-              │                             │
-    ┌─────────▼─────────┐        ┌─────────▼─────────┐
-    │  Usuario existe  │        │  Usuario no existe │
-    └────────┬────────┘        └──────────┬──────────┘
-              │                            │
-    ┌─────────▼────────────────────────────▼──────────┐
-    │              CONSULTAR DATOS                       │
-    │  - Usuario, estadísticas, gráficos                │
-    └────────────────────┬──────────────────────────────┘
-                         │
-              ┌──────────▼────────────┐
-              │  CREAR WORKBOOK       │
-              │                       │
-              │  HOJA 1: Datos         │
-              │  HOJA 2: Estadísticas │
-              │  HOJA 3: Gráfico Barras│
-              │  HOJA 4: Gráfico Torta │
-              │                       │
-              └──────────┬────────────┘
-                         │
-              ┌──────────▼──────────┐
-              │  RETORNAR EXCEL     │
-              │  HttpResponse       │
-              └─────────────────────┘
-```
-
----
-
-## 5. Resumen de Patrones
+## 4. Resumen de Patrones
 
 | Patrón | Ubicación | Descripción |
 |--------|-----------|-------------|
-| MVC | Django completo | Arquitectura del framework |
-| Factory Method | views.py | Creación de PDF/Excel |
-| Repository | views.py | Acceso a datos MySQL |
-| Strategy | generar_pdf/excel | Diferentes formatos de exportación |
-| Template Method | views.py | Estructura de generación |
-| SPA | index.html | Interfaz de una página |
-| Singleton | settings.py | Configuración única |
+| **MVC** | Django completo | Arquitectura del framework |
+| **Factory Method** | `generar_pdf()`, `generar_excel()` | Creación de documentos |
+| **Repository** | `connection.cursor()` | Acceso a datos MySQL |
+| **Service Layer** | Funciones de views | Lógica de negocio |
+| **Template Method** | `generar_pdf()`, `generar_excel()` | Estructura de generación |
 
 ---
 
-## 6. Beneficios de los Patrones
+## 5. Beneficios de los Patrones
 
 1. **Mantenibilidad**: Código organizado y separable
 2. **Reutilización**: Funciones genéricas reutilizables
@@ -372,10 +309,26 @@ document.getElementById('buscarForm').addEventListener('submit', function(e) {
 
 ---
 
-## 7. Tecnologías que Implementan los Patrones
+## 6. Tecnologías que Implementan los Patrones
 
-- **Django**: MVC, Singleton, Factory
-- **ReportLab**: Template Method, Factory
-- **openpyxl**: Strategy, Template Method
-- **Bootstrap**: SPA pattern
-- **SweetAlert2**: Observer pattern
+| Tecnología | Patrón Principal |
+|------------|------------------|
+| **Django** | MVC, Service Layer |
+| **ReportLab** | Factory Method, Template Method |
+| **openpyxl** | Factory Method, Template Method |
+| **Bootstrap** | SPA Pattern |
+| **SweetAlert2** | Observer Pattern |
+
+---
+
+## 7. Conclusión
+
+Este proyecto demuestra la aplicación práctica de múltiples patrones de diseño en un sistema real de generación de informes, utilizando:
+
+- **Python/Django** para el backend
+- **MySQL** para datos
+- **ReportLab** para PDF con gráficos
+- **openpyxl** para Excel con gráficos interactivos
+- **Bootstrap** para interfaz moderna
+
+Los patrones de diseño permiten un código mantenible, escalable y testeable.
