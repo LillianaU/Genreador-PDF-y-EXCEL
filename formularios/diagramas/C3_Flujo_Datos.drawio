@@ -1,0 +1,125 @@
+<mxfile host="app.diagrams.net" modified="2026-05-20T04:00:00.000Z" agent="Mozilla/5.0" version="22.1.0" type="device">
+  <diagram name="C3 - Diagrama de Flujo de Datos" id="c3">
+    <mxGraphModel dx="1200" dy="1000" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="1000" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        
+        <!-- Título -->
+        <mxCell id="titulo" value="C3 - FLUJO DE DATOS DETALLADO" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;fontSize=18;fontStyle=1;fontColor=#000066" vertex="1" parent="1">
+          <mxGeometry x="350" y="10" width="400" height="30" as="geometry" />
+        </mxCell>
+        
+        <!-- Inicio -->
+        <mxCell id="inicio" value="INICIO" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=14;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="480" y="50" width="100" height="50" as="geometry" />
+        </mxCell>
+        
+        <!-- Usuario envía solicitud -->
+        <mxCell id="solicitud" value="Usuario envía&#xa;solicitud POST" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12" vertex="1" parent="1">
+          <mxGeometry x="440" y="130" width="180" height="50" as="geometry" />
+        </mxCell>
+        
+        <!-- View procesa -->
+        <mxCell id="view" value="View (views.py)&#xa;Procesa solicitud" style="rhombus;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12" vertex="1" parent="1">
+          <mxGeometry x="450" y="210" width="160" height="80" as="geometry" />
+        </mxCell>
+        
+        <!-- Decisión tipo búsqueda -->
+        <mxCell id="tipo" value="¿Qué tipo de&#xa;búsqueda?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11" vertex="1" parent="1">
+          <mxGeometry x="450" y="320" width="160" height="70" as="geometry" />
+        </mxCell>
+        
+        <!-- Por ID -->
+        <mxCell id="buscar_id" value="Buscar por ID&#xa;(SELECT * FROM usuarios&#xa;WHERE id = %s)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff;strokeColor=#666666;fontSize=11" vertex="1" parent="1">
+          <mxGeometry x="200" y="420" width="200" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- Por Nombre -->
+        <mxCell id="buscar_nombre" value="Buscar por Nombre&#xa;(SELECT * FROM usuarios&#xa;WHERE nombre LIKE %s)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff;strokeColor=#666666;fontSize=11" vertex="1" parent="1">
+          <mxGeometry x="650" y="420" width="200" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- Conexión MySQL -->
+        <mxCell id="mysql" value="MySQL&#xa;Base de Datos" style="shape=cylinder;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=10;fillColor=#f5f5f5;strokeColor=#666666;fontSize=12" vertex="1" parent="1">
+          <mxGeometry x="480" y="530" width="140" height="80" as="geometry" />
+        </mxCell>
+        
+        <!-- Obtiene datos -->
+        <mxCell id="obtiene_datos" value="Obtiene datos&#xa;del usuario" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff;strokeColor=#666666;fontSize=11" vertex="1" parent="1">
+          <mxGeometry x="480" y="640" width="140" height="50" as="geometry" />
+        </mxCell>
+        
+        <!-- Generar PDF -->
+        <mxCell id="gen_pdf" value="Generar PDF&#xa;(ReportLab)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11" vertex="1" parent="1">
+          <mxGeometry x="280" y="720" width="150" height="50" as="geometry" />
+        </mxCell>
+        
+        <!-- Generar Excel -->
+        <mxCell id="gen_excel" value="Generar Excel&#xa;(openpyxl)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11" vertex="1" parent="1">
+          <mxGeometry x="520" y="720" width="150" height="50" as="geometry" />
+        </mxCell>
+        
+        <!-- Render Template -->
+        <mxCell id="render" value="Render Template&#xa;+ Modal Bootstrap" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11" vertex="1" parent="1">
+          <mxGeometry x="700" y="720" width="150" height="50" as="geometry" />
+        </mxCell>
+        
+        <!-- Fin -->
+        <mxCell id="fin" value="FIN" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=14;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="480" y="810" width="100" height="50" as="geometry" />
+        </mxCell>
+        
+        <!-- Conexiones -->
+        <mxCell id="c1" style="edgeStyle=orthogonalCellStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#333333" edge="1" parent="1" source="inicio" target="solicitud">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c2" style="edgeStyle=orthogonalCellStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#333333" edge="1" parent="1" source="solicitud" target="view">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c3" style="edgeStyle=orthogonalCellStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#333333" edge="1" parent="1" source="view" target="tipo">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c4" style="edgeStyle=orthogonalCellStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#333333" edge="1" parent="1" source="tipo" target="buscar_id">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c5" style="edgeStyle=orthogonalCellStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#333333" edge="1" parent="1" source="tipo" target="buscar_nombre">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c6" style="edgeStyle=orthogonalCellStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#333333" edge="1" parent="1" source="buscar_id" target="mysql">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c7" style="edgeStyle=orthogonalCellStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#333333" edge="1" parent="1" source="buscar_nombre" target="mysql">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c8" style="edgeStyle=orthogonalCellStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#333333" edge="1" parent="1" source="mysql" target="obtiene_datos">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c9" style="edgeStyle=orthogonalCellStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#333333;startArrow=classic;endArrow=classic" edge="1" parent="1" source="obtiene_datos" target="gen_pdf">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c10" style="edgeStyle=orthogonalCellStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#333333;startArrow=classic;endArrow=classic" edge="1" parent="1" source="obtiene_datos" target="gen_excel">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c11" style="edgeStyle=orthogonalCellStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#333333;startArrow=classic;endArrow=classic" edge="1" parent="1" source="obtiene_datos" target="render">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c12" style="edgeStyle=orthogonalCellStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#333333" edge="1" parent="1" source="gen_pdf" target="fin">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c13" style="edgeStyle=orthogonalCellStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#333333" edge="1" parent="1" source="gen_excel" target="fin">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c14" style="edgeStyle=orthogonalCellStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#333333" edge="1" parent="1" source="render" target="fin">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- Leyenda -->
+        <mxCell id="leyenda" value="LEYENDA:&#xa;- Verde: Inicio/Fin&#xa;- Amarillo: Proceso&#xa;- Azul: Decisión&#xa;- Gris: Base de datos" style="text;html=1;align=left;verticalAlign=top;resizable=0;points=[];autosize=1;fontSize=10;fillColor=#fff;border=1" vertex="1" parent="1">
+          <mxGeometry x="30" y="50" width="120" height="80" as="geometry" />
+        </mxCell>
+        
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

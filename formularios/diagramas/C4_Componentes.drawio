@@ -1,0 +1,107 @@
+<mxfile host="app.diagrams.net" modified="2026-05-20T04:00:00.000Z" agent="Mozilla/5.0" version="22.1.0" type="device">
+  <diagram name="C4 - Diagrama de Componentes" id="c4">
+    <mxGraphModel dx="1200" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        
+        <!-- Título -->
+        <mxCell id="titulo" value="C4 - DIAGRAMA DE COMPONENTES" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;fontSize=18;fontStyle=1;fontColor=#000066" vertex="1" parent="1">
+          <mxGeometry x="350" y="10" width="400" height="30" as="geometry" />
+        </mxCell>
+        
+        <!-- CAPA PRESENTACIÓN -->
+        <mxCell id="capa_presentacion" value="CAPA DE PRESENTACIÓN" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;fontSize=14;fontStyle=1;fillColor=#dae8fc;strokeColor=#6c8ebf" vertex="1" parent="1">
+          <mxGeometry x="40" y="50" width="300" height="30" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="html" value="index.html&#xa;(Menú Flotante)" style="shape=component;whiteSpace=wrap;html=1;fillColor=#fff;strokeColor=#666666;fontSize=11" vertex="1" parent="1">
+          <mxGeometry x="60" y="90" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="lista" value="lista.html&#xa;(Tabla usuarios)" style="shape=component;whiteSpace=wrap;html=1;fillColor=#fff;strokeColor=#666666;fontSize=11" vertex="1" parent="1">
+          <mxGeometry x="200" y="90" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="css" value="estilos.css&#xa;(Diseño)" style="shape=component;whiteSpace=wrap;html=1;fillColor=#fff;strokeColor=#666666;fontSize=11" vertex="1" parent="1">
+          <mxGeometry x="60" y="170" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="js" value="JavaScript&#xa;(Lógica UI)" style="shape=component;whiteSpace=wrap;html=1;fillColor=#fff;strokeColor=#666666;fontSize=11" vertex="1" parent="1">
+          <mxGeometry x="200" y="170" width="120" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- CAPA LÓGICA -->
+        <mxCell id="capa_logica" value="CAPA DE LÓGICA (Django)" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;fontSize=14;fontStyle=1;fillColor=#d5e8d4;strokeColor=#82b366" vertex="1" parent="1">
+          <mxGeometry x="380" y="50" width="300" height="30" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="views" value="views.py&#xa;(Controlador)&#xa;- index()&#xa;- generar_pdf()&#xa;- generar_excel()" style="shape=component;whiteSpace=wrap;html=1;fillColor=#fff;strokeColor=#666666;fontSize=10;align=left;spacingLeft=5" vertex="1" parent="1">
+          <mxGeometry x="400" y="90" width="140" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="urls" value="urls.py&#xa;(Rutas)&#xa;&#xa;7 rutas definidas" style="shape=component;whiteSpace=wrap;html=1;fillColor=#fff;strokeColor=#666666;fontSize=10;align=left;spacingLeft=5" vertex="1" parent="1">
+          <mxGeometry x="560" y="90" width="120" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="settings" value="settings.py&#xa;(Config)&#xa;&#xa;- DB MySQL&#xa;- Static files" style="shape=component;whiteSpace=wrap;html=1;fillColor=#fff;strokeColor=#666666;fontSize=10;align=left;spacingLeft=5" vertex="1" parent="1">
+          <mxGeometry x="400" y="190" width="140" height="70" as="geometry" />
+        </mxCell>
+        
+        <!-- CAPA SERVICIOS -->
+        <mxCell id="capa_servicios" value="CAPA DE SERVICIOS" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;fontSize=14;fontStyle=1;fillColor=#fff2cc;strokeColor=#d6b656" vertex="1" parent="1">
+          <mxGeometry x="720" y="50" width="280" height="30" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="pdf_service" value="PDFService&#xa;(ReportLab)&#xa;- Barras&#xa;- Torta&#xa;- Dispersión" style="shape=component;whiteSpace=wrap;html=1;fillColor=#fff;strokeColor=#666666;fontSize=10;align=left;spacingLeft=5" vertex="1" parent="1">
+          <mxGeometry x="740" y="90" width="130" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="excel_service" value="ExcelService&#xa;(openpyxl)&#xa;- Hojas&#xa;- Gráficos&#xa;- Estilos" style="shape=component;whiteSpace=wrap;html=1;fillColor=#fff;strokeColor=#666666;fontSize=10;align=left;spacingLeft=5" vertex="1" parent="1">
+          <mxGeometry x="880" y="90" width="120" height="80" as="geometry" />
+        </mxCell>
+        
+        <!-- CAPA DATOS -->
+        <mxCell id="capa_datos" value="CAPA DE DATOS (MySQL)" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;fontSize=14;fontStyle=1;fillColor=#f8cecc;strokeColor=#b85450" vertex="1" parent="1">
+          <mxGeometry x="400" y="300" width="300" height="30" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="mysql_server" value="MySQL Server&#xa;localhost:3306&#xa;&#xa;Base: ejemplo&#xa;Tabla: usuarios" style="shape=cylinder;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11" vertex="1" parent="1">
+          <mxGeometry x="450" y="350" width="180" height="100" as="geometry" />
+        </mxCell>
+        
+        <!-- STATIC FILES -->
+        <mxCell id="capa_static" value="ARCHIVOS ESTÁTICOS" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;fontSize=14;fontStyle=1;fillColor=#e1d5e7;strokeColor=#9673a6" vertex="1" parent="1">
+          <mxGeometry x="40" y="300" width="280" height="30" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="bootstrap" value="Bootstrap 5.3&#xa;(CSS + JS local)" style="shape=component;whiteSpace=wrap;html=1;fillColor=#fff;strokeColor=#666666;fontSize=10" vertex="1" parent="1">
+          <mxGeometry x="60" y="350" width="120" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="sweetalert" value="SweetAlert2&#xa;(Alertas local)" style="shape=component;whiteSpace=wrap;html=1;fillColor=#fff;strokeColor=#666666;fontSize=10" vertex="1" parent="1">
+          <mxGeometry x="200" y="350" width="100" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="fontawesome" value="FontAwesome&#xa;(Iconos)" style="shape=component;whiteSpace=wrap;html=1;fillColor=#fff;strokeColor=#666666;fontSize=10" vertex="1" parent="1">
+          <mxGeometry x="60" y="420" width="120" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="logo" value="logo.png&#xa;(Sistema)" style="shape=component;whiteSpace=wrap;html=1;fillColor=#fff;strokeColor=#666666;fontSize=10" vertex="1" parent="1">
+          <mxGeometry x="200" y="420" width="100" height="50" as="geometry" />
+        </mxCell>
+        
+        <!-- Flechas de conexión entre capas -->
+        <mxCell id="fc1" style="edgeStyle=orthogonalCellStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#333333;startArrow=classic;endArrow=classic" edge="1" parent="1" source="html" target="views">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="fc2" style="edgeStyle=orthogonalCellStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#333333;startArrow=classic;endArrow=classic" edge="1" parent="1" source="views" target="mysql_server">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="fc3" style="edgeStyle=orthogonalCellStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#333333;startArrow=classic;endArrow=classic" edge="1" parent="1" source="views" target="pdf_service">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="fc4" style="edgeStyle=orthogonalCellStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#333333;startArrow=classic;endArrow=classic" edge="1" parent="1" source="views" target="excel_service">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- Leyenda de componentes -->
+        <mxCell id="leyenda_comp" value="COMPONENTES:&#xa;&#xa;■ Template (HTML)&#xa;■ Controlador (views.py)&#xa;■ Configuración&#xa;■ Servicios PDF/Excel&#xa;■ Base de datos" style="text;html=1;align=left;verticalAlign=top;resizable=0;points=[];autosize=1;fontSize=10;fillColor=#fff;border=1" vertex="1" parent="1">
+          <mxGeometry x="720" y="350" width="150" height="100" as="geometry" />
+        </mxCell>
+        
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

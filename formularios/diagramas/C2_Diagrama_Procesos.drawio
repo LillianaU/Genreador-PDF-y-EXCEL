@@ -1,0 +1,88 @@
+<mxfile host="app.diagrams.net" modified="2026-05-20T04:00:00.000Z" agent="Mozilla/5.0" version="22.1.0" type="device">
+  <diagram name="C2 - Diagrama de Procesos" id="c2">
+    <mxGraphModel dx="1200" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        
+        <!-- Título -->
+        <mxCell id="titulo" value="C2 - DIAGRAMA DE PROCESOS DEL SISTEMA" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;fontSize=18;fontStyle=1;fontColor=#000066" vertex="1" parent="1">
+          <mxGeometry x="350" y="20" width="400" height="30" as="geometry" />
+        </mxCell>
+        
+        <!-- Proceso Principal -->
+        <mxCell id="proceso1" value="1. Búsqueda de Usuario" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="80" y="100" width="250" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="proceso2" value="2. Generar PDF" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=14;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="80" y="200" width="250" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="proceso3" value="3. Generar Excel" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=14;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="80" y="300" width="250" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="proceso4" value="4. Reporte General" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#666666;fillColor=#f8cecc;fontSize=14;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="80" y="400" width="250" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- Base de datos -->
+        <mxCell id="bd" value="BASE DE DATOS&#xa;MySQL" style="shape=cylinder;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#f5f5f5;strokeColor=#666666;fontSize=12" vertex="1" parent="1">
+          <mxGeometry x="750" y="200" width="150" height="100" as="geometry" />
+        </mxCell>
+        
+        <!-- Subprocesos Búsqueda -->
+        <mxCell id="sub1a" value="1.1 Por ID" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff;strokeColor=#666666;fontSize=11" vertex="1" parent="1">
+          <mxGeometry x="400" y="100" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="sub1b" value="1.2 Por Nombre" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff;strokeColor=#666666;fontSize=11" vertex="1" parent="1">
+          <mxGeometry x="540" y="100" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="sub1c" value="1.3 Mostrar Modal" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff;strokeColor=#666666;fontSize=11" vertex="1" parent="1">
+          <mxGeometry x="680" y="100" width="120" height="40" as="geometry" />
+        </mxCell>
+        
+        <!-- Subprocesos PDF -->
+        <mxCell id="sub2a" value="2.1 Datos Usuario" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff;strokeColor=#666666;fontSize=11" vertex="1" parent="1">
+          <mxGeometry x="400" y="200" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="sub2b" value="2.2 Gráfico Barras" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff;strokeColor=#666666;fontSize=11" vertex="1" parent="1">
+          <mxGeometry x="540" y="200" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="sub2c" value="2.3 Gráfico Torta" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff;strokeColor=#666666;fontSize=11" vertex="1" parent="1">
+          <mxGeometry x="680" y="200" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="sub2d" value="2.4 Gráfico Dispersión" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff;strokeColor=#666666;fontSize=11" vertex="1" parent="1">
+          <mxGeometry x="820" y="200" width="120" height="40" as="geometry" />
+        </mxCell>
+        
+        <!-- Subprocesos Excel -->
+        <mxCell id="sub3a" value="3.1 Hoja Datos" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff;strokeColor=#666666;fontSize=11" vertex="1" parent="1">
+          <mxGeometry x="400" y="300" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="sub3b" value="3.2 Hoja Stats" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff;strokeColor=#666666;fontSize=11" vertex="1" parent="1">
+          <mxGeometry x="540" y="300" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="sub3c" value="3.3 Gráficos Excel" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff;strokeColor=#666666;fontSize=11" vertex="1" parent="1">
+          <mxGeometry x="680" y="300" width="120" height="40" as="geometry" />
+        </mxCell>
+        
+        <!-- Flechas de conexión -->
+        <mxCell id="arrow1" style="edgeStyle=orthogonalCellStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#333333;startArrow=classic;endArrow=classic" edge="1" parent="1" source="proceso1" target="sub1a">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arrow2" style="edgeStyle=orthogonalCellStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#333333;startArrow=classic;endArrow=classic" edge="1" parent="1" source="proceso2" target="sub2a">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arrow3" style="edgeStyle=orthogonalCellStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#333333;startArrow=classic;endArrow=classic" edge="1" parent="1" source="proceso3" target="sub3a">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arrow4" style="edgeStyle=orthogonalCellStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#333333;startArrow=classic;endArrow=classic" edge="1" parent="1" source="sub1c" target="bd">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
