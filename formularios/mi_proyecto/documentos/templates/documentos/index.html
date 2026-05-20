@@ -215,6 +215,32 @@
     </style>
 </head>
 <body>
+    <!-- Modal de Resumen de Usuario -->
+    <div class="modal fade" id="usuarioModal" tabindex="-1" aria-labelledby="usuarioModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="usuarioModalLabel">
+                        <i class="fas fa-user-circle me-2"></i>Resumen del Usuario
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="modalContent">
+                    <!-- contenido dinámicas -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-danger" id="btnImprimirModal" onclick="imprimirDesdeModal()">
+                        <i class="fas fa-print me-1"></i> Imprimir PDF
+                    </button>
+                    <button type="button" class="btn btn-success" id="btnExcelModal" onclick="excelDesdeModal()">
+                        <i class="fas fa-file-excel me-1"></i> Exportar Excel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="container-fluid">
         <div class="row">
             <!-- Sidebar -->
@@ -463,65 +489,33 @@
                 return;
             }
             
-            fetch('{% url "index" %}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'X-CSRFToken': '{{ csrf_token }}'
-                },
-                body: 'id_usuario=' + id
-            })
-            .then(response => response.text())
-            .then(html => {
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(html, 'text/html');
-                const usuario = doc.querySelector('#resultado');
-                const error = doc.querySelector('.alert-danger');
-                
-                if (usuario) {
-                    const idMatch = usuario.querySelector('td:nth-child(2)');
-                    const nombreMatch = usuario.querySelector('tr:nth-child(2) td:nth-child(2)');
-                    const correoMatch = usuario.querySelector('tr:nth-child(3) td:nth-child(2)');
-                    const telefonoMatch = usuario.querySelector('tr:nth-child(4) td:nth-child(2)');
-                    const direccionMatch = usuario.querySelector('tr:nth-child(5) td:nth-child(2)');
-                    const fechaMatch = usuario.querySelector('tr:nth-child(6) td:nth-child(2)');
-                    
-                    if (idMatch) {
-                        usuarioActual = {
-                            id: idMatch.textContent,
-                            nombre: nombreMatch ? nombreMatch.textContent : '',
-                            correo: correoMatch ? correoMatch.textContent : '',
-                            telefono: telefonoMatch ? telefonoMatch.textContent : '',
-                            direccion: direccionMatch ? direccionMatch.textContent : '',
-                            fecha: fechaMatch ? fechaMatch.textContent : ''
-                        };
-                        mostrarUsuario(usuarioActual);
-                    } else {
-                        Swal.fire({
-                            icon: 'warning',
-                            title: 'Usuario no encontrado',
-                            text: 'No existe un usuario con el ID proporcionado',
-                            confirmButtonColor: '#e74c3c'
-                        });
-                    }
-                } else if (error) {
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Usuario no encontrado',
-                        text: 'No existe un usuario con el ID proporcionado',
-                        confirmButtonColor: '#e74c3c'
-                    });
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'Ocurrió un error al buscar el usuario',
-                    confirmButtonColor: '#e74c3c'
-                });
+            // Mostrar loading
+            Swal.fire({
+                title: 'Buscando...',
+                text: 'Buscando usuario con ID: ' + id,
+                allowOutsideClick: false,
+                didOpen: () => { Swal.showLoading(); }
             });
+            
+            // Enviar formulario directamente
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '{% url "index" %}';
+            
+            const csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = 'csrfmiddlewaretoken';
+            csrfInput.value = '{{ csrf_token }}';
+            
+            const idInput = document.createElement('input');
+            idInput.type = 'hidden';
+            idInput.name = 'id_usuario';
+            idInput.value = id;
+            
+            form.appendChild(csrfInput);
+            form.appendChild(idInput);
+            document.body.appendChild(form);
+            form.submit();
         }
         
         function buscarPorNombre() {
@@ -537,127 +531,127 @@
                 return;
             }
             
-            fetch('{% url "index" %}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'X-CSRFToken': '{{ csrf_token }}'
-                },
-                body: 'nombre_busqueda=' + encodeURIComponent(nombre)
-            })
-            .then(response => response.text())
-            .then(html => {
-                document.open();
-                document.write(html);
-                document.close();
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'Ocurrió un error al buscar por nombre',
-                    confirmButtonColor: '#e74c3c'
-                });
+            // Mostrar loading
+            Swal.fire({
+                title: 'Buscando...',
+                text: 'Buscando: ' + nombre,
+                allowOutsideClick: false,
+                didOpen: () => { Swal.showLoading(); }
             });
+            
+            // Enviar formulario directamente
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '{% url "index" %}';
+            
+            const csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = 'csrfmiddlewaretoken';
+            csrfInput.value = '{{ csrf_token }}';
+            
+            const nombreInput = document.createElement('input');
+            nombreInput.type = 'hidden';
+            nombreInput.name = 'nombre_busqueda';
+            nombreInput.value = nombre;
+            
+            form.appendChild(csrfInput);
+            form.appendChild(nombreInput);
+            document.body.appendChild(form);
+            form.submit();
         }
         
+        let usuarioGlobalId = null;
+
         function mostrarUsuario(usuario) {
+            usuarioGlobalId = usuario.id;
             const inicial = usuario.nombre.charAt(0).toUpperCase();
             const fecha = new Date().toLocaleDateString('es-ES');
             
-            document.getElementById('resultadoBusqueda').innerHTML = `
-                <div class="fade-in">
-                    <div class="user-card">
-                        <div class="d-flex align-items-center justify-content-between">
-                            <div class="d-flex align-items-center">
-                                <div class="avatar me-3">${inicial}</div>
-                                <div>
-                                    <h4 class="mb-0">${usuario.nombre}</h4>
-                                    <small>ID: ${usuario.id}</small>
-                                </div>
-                            </div>
-                            <div>
-                                <span class="badge bg-light text-dark">Fecha: ${fecha}</span>
-                            </div>
+            // Generar contenido del modal
+            const modalContent = `
+                <div class="row">
+                    <div class="col-md-4 text-center">
+                        <div class="avatar-lg mx-auto mb-3" style="width: 100px; height: 100px; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 40px; color: white;">
+                            ${inicial}
                         </div>
+                        <h4>${usuario.nombre}</h4>
+                        <span class="badge bg-primary">ID: ${usuario.id}</span>
                     </div>
-                    
-                    <div class="stats-grid">
-                        <div class="stat-item">
-                            <div class="stat-icon">📧</div>
-                            <div class="stat-value">1</div>
-                            <div class="stat-label">Correo</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-icon">📅</div>
-                            <div class="stat-value">1</div>
-                            <div class="stat-label">Registro</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-icon">📍</div>
-                            <div class="stat-value">${usuario.direccion !== 'N/A' ? '1' : '0'}</div>
-                            <div class="stat-label">Dirección</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-icon">📊</div>
-                            <div class="stat-value">3</div>
-                            <div class="stat-label">Gráficos</div>
-                        </div>
-                    </div>
-                    
-                    <div class="table-section">
-                        <h6 class="mb-3"><i class="fas fa-user-circle me-2"></i>Datos del Usuario</h6>
-                        <table class="table table-bordered">
-                            <tr><td><strong>ID</strong></td><td>${usuario.id}</td></tr>
-                            <tr><td><strong>Nombre</strong></td><td>${usuario.nombre}</td></tr>
-                            <tr><td><strong>Correo</strong></td><td>${usuario.correo}</td></tr>
-                            <tr><td><strong>Teléfono</strong></td><td>${usuario.telefono}</td></tr>
-                            <tr><td><strong>Dirección</strong></td><td>${usuario.direccion}</td></tr>
-                            <tr><td><strong>Fecha de Creación</strong></td><td>${usuario.fecha}</td></tr>
+                    <div class="col-md-8">
+                        <table class="table table-sm table-borderless">
+                            <tr>
+                                <td><strong><i class="fas fa-envelope me-2 text-primary"></i>Correo:</strong></td>
+                                <td>${usuario.correo}</td>
+                            </tr>
+                            <tr>
+                                <td><strong><i class="fas fa-phone me-2 text-success"></i>Teléfono:</strong></td>
+                                <td>${usuario.telefono}</td>
+                            </tr>
+                            <tr>
+                                <td><strong><i class="fas fa-map-marker-alt me-2 text-warning"></i>Dirección:</strong></td>
+                                <td>${usuario.direccion}</td>
+                            </tr>
+                            <tr>
+                                <td><strong><i class="fas fa-calendar me-2 text-info"></i>Fecha de Registro:</strong></td>
+                                <td>${usuario.fecha}</td>
+                            </tr>
                         </table>
-                        
-                        <h6 class="mt-4 mb-3"><i class="fas fa-chart-pie me-2"></i>Estadísticas del Usuario</h6>
-                        <div class="row mb-3">
-                            <div class="col-md-4">
-                                <div class="alert alert-info">
-                                    <strong>Barras:</strong> Distribución por mes
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="alert alert-warning">
-                                    <strong>Torta:</strong> Distribución por inicial
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="alert alert-success">
-                                    <strong>Dispersión:</strong> Posición vs categoría
-                                </div>
-                            </div>
+                    </div>
+                </div>
+                <hr>
+                <div class="row text-center">
+                    <div class="col-md-4">
+                        <div class="stat-box p-3 bg-primary bg-opacity-10 rounded">
+                            <i class="fas fa-chart-bar fa-2x text-primary"></i>
+                            <p class="mb-0 mt-2"><strong>Barras</strong></p>
+                            <small class="text-muted">Distribución por mes</small>
                         </div>
-                        
-                        <div class="d-flex gap-3 mt-4">
-                            <button class="btn btn-option pdf flex-fill" onclick="descargarPDF(${usuario.id})">
-                                <i class="fas fa-file-pdf me-2"></i> PDF
-                            </button>
-                            <button class="btn btn-option excel flex-fill" onclick="descargarExcel(${usuario.id})">
-                                <i class="fas fa-file-excel me-2"></i> Excel
-                            </button>
-                            <button class="btn btn-primary flex-fill" onclick="imprimirPagina(${usuario.id})">
-                                <i class="fas fa-print me-2"></i> Imprimir
-                            </button>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="stat-box p-3 bg-warning bg-opacity-10 rounded">
+                            <i class="fas fa-chart-pie fa-2x text-warning"></i>
+                            <p class="mb-0 mt-2"><strong>Torta</strong></p>
+                            <small class="text-muted">Por inicial</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="stat-box p-3 bg-success bg-opacity-10 rounded">
+                            <i class="fas fa-dot-circle fa-2x text-success"></i>
+                            <p class="mb-0 mt-2"><strong>Dispersión</strong></p>
+                            <small class="text-muted">Posición real</small>
                         </div>
                     </div>
                 </div>
             `;
             
-            Swal.fire({
-                icon: 'success',
-                title: 'Usuario encontrado',
-                text: `${usuario.nombre} - ID: ${usuario.id}`,
-                confirmButtonColor: '#3498db',
-                timer: 2000
-            });
+            document.getElementById('modalContent').innerHTML = modalContent;
+            
+            // Mostrar modal
+            const modal = new bootstrap.Modal(document.getElementById('usuarioModal'));
+            modal.show();
+            
+            // También mostrar en la página
+            document.getElementById('resultadoBusqueda').innerHTML = `
+                <div class="alert alert-success">
+                    <i class="fas fa-check-circle me-2"></i>
+                    <strong>Usuario encontrado:</strong> ${usuario.nombre} (ID: ${usuario.id})
+                    <button class="btn btn-sm btn-primary float-end" data-bs-toggle="modal" data-bs-target="#usuarioModal">
+                        Ver Detalles
+                    </button>
+                </div>
+            `;
+        }
+
+        function imprimirDesdeModal() {
+            if (usuarioGlobalId) {
+                window.open('/generar_pdf/' + usuarioGlobalId + '/', '_blank');
+            }
+        }
+
+        function excelDesdeModal() {
+            if (usuarioGlobalId) {
+                window.location.href = '/generar_excel/' + usuarioGlobalId + '/';
+            }
         }
         
         function descargarPDF(id) {
@@ -744,6 +738,21 @@
                 buscarPorNombre();
             }
         });
+        
+        // Mostrar modal automáticamente si hay usuario
+        {% if usuario %}
+        window.addEventListener('load', function() {
+            const usuarioData = {
+                id: '{{ usuario.id }}',
+                nombre: '{{ usuario.nombre }}',
+                correo: '{{ usuario.correo }}',
+                telefono: '{{ usuario.telefono }}',
+                direccion: '{{ usuario.direccion }}',
+                fecha: '{{ usuario.fecha_creacion }}'
+            };
+            mostrarUsuario(usuarioData);
+        });
+        {% endif %}
     </script>
 </body>
 </html>

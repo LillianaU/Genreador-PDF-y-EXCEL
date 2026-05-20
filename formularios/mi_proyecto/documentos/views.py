@@ -31,9 +31,10 @@ from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Image, Spacer
 from reportlab.lib.units import inch
-from reportlab.graphics.shapes import Drawing, String, Circle, Rect, Line
+from reportlab.graphics.shapes import Drawing, String, Circle, Rect, Line, Polygon, Wedge
 from reportlab.graphics import renderPDF
 from reportlab.lib.utils import ImageReader
+from reportlab.lib.colors import HexColor
 
 # Importaciones del sistema y utilidades
 import os
@@ -73,7 +74,7 @@ def index(request):
                 row = cursor.fetchone()
                 if row:
                     usuario = dict(zip(columns, row))
-                    return render(request, 'documentos/index.html', {'usuario': usuario})
+                    return render(request, 'documentos/index.html', {'usuario': usuario, 'mostrar_modal': True})
                 else:
                     return render(request, 'documentos/index.html', {'error': 'Usuario no encontrado'})
         
@@ -259,108 +260,168 @@ def generar_pdf(request, id_usuario):
             ]))
             elements.append(stats_table)
 
-            # Gráfico de Barras - Distribución real por mes
+            # ========== GRÁFICO DE BARRAS TIPO CHART.JS ==========
             if usuarios_mes:
-                elements.append(Paragraph("📊 GRÁFICO DE BARRAS - USUARIOS POR MES (DATOS REALES)", section_style))
+                elements.append(Paragraph("📊 GRÁFICO DE BARRAS - USUARIOS POR MES (ESTILO CHART.JS)", section_style))
                 
-                chart_data = [['Mes', 'Cantidad', '█ Barra']]
+                # Crear drawing para gráfico de barras
+                drawing = Drawing(400, 200)
                 max_val = max(cant for _, cant in usuarios_mes) if usuarios_mes else 1
+                bar_width = 25
+                gap = 10
+                start_x = 40
+                start_y = 30
                 
-                for mes, cantidad in usuarios_mes[:12]:
-                    bar_length = int((cantidad / max_val) * 20)
-                    barra = '█' * bar_length
-                    chart_data.append([str(mes), str(cantidad), barra])
+                # Ejes
+                line = Line(start_x, start_y, start_x, 170)
+                line.strokeColor = HexColor('#bdc3c7')
+                line.strokeWidth = 1
+                drawing.add(line)
                 
-                bar_table = Table(chart_data, colWidths=[1.2*inch, 0.8*inch, 2.5*inch])
-                bar_styles = [
-                    ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#3498db')),
-                    ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
-                    ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-                    ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-                    ('FONTSIZE', (0, 0), (-1, 0), 10),
-                    ('BACKGROUND', (0, 1), (0, -1), colors.HexColor('#ecf0f1')),
-                    ('BACKGROUND', (1, 1), (1, -1), colors.HexColor('#3498db')),
-                    ('TEXTCOLOR', (1, 1), (1, -1), colors.white),
-                    ('FONTNAME', (1, 1), (1, -1), 'Helvetica-Bold'),
-                    ('BACKGROUND', (2, 1), (2, -1), colors.HexColor('#d5dbdb')),
-                    ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#bdc3c7')),
-                ]
+                line2 = Line(start_x, 170, 350, 170)
+                line2.strokeColor = HexColor('#bdc3c7')
+                line2.strokeWidth = 1
+                drawing.add(line2)
                 
-                bar_table.setStyle(TableStyle(bar_styles))
-                elements.append(bar_table)
-                elements.append(Spacer(1, 10))
+                # Barras con colores Chart.js
+                colores_barras = ['#667eea', '#764ba2', '#f093fb', '#f5576c', '#4facfe', 
+                                 '#00f2fe', '#43e97b', '#38f9d7', '#fa709a', '#fee140',
+                                 '#a8edea', '#fed6e3']
+                
+                for i, (mes, cantidad) in enumerate(usuarios_mes[:10]):
+                    bar_height = (cantidad / max_val) * 120
+                    x = start_x + 20 + i * (bar_width + gap)
+                    
+                    # Barra
+                    rect = Rect(x, start_y + 10, bar_width, bar_height)
+                    rect.fillColor = HexColor(colores_barras[i % len(colores_barras)])
+                    rect.strokeColor = HexColor('#ffffff')
+                    rect.strokeWidth = 1
+                    drawing.add(rect)
+                    
+                    # Etiqueta debajo
+                    label = String(x + bar_width/2, 15, str(mes)[-2:] if len(str(mes)) > 2 else str(mes))
+                    label.fontSize = 7
+                    label.textAnchor = 'middle'
+                    label.fillColor = HexColor('#7f8c8d')
+                    drawing.add(label)
+                    
+                    # Valor arriba de la barra
+                    if cantidad > 0:
+                        val_label = String(x + bar_width/2, start_y + 15 + bar_height, str(cantidad))
+                        val_label.fontSize = 8
+                        val_label.textAnchor = 'middle'
+                        val_label.fillColor = HexColor('#2c3e50')
+                        val_label.fontName = 'Helvetica-Bold'
+                        drawing.add(val_label)
+                
+                elements.append(drawing)
+                elements.append(Spacer(1, 15))
 
-            # Gráfico de Torta - Distribución real por inicial
+            # ========== GRÁFICO DE TORTA TIPO CHART.JS ==========
             if usuarios_inicial:
-                elements.append(Paragraph("🥧 GRÁFICO DE TORTA - DISTRIBUCIÓN POR INICIAL (DATOS REALES)", section_style))
+                elements.append(Paragraph("🥧 GRÁFICO DE TORTA - DISTRIBUCIÓN POR INICIAL (ESTILO CHART.JS)", section_style))
                 
-                # Colores para torta
-                colores_torta = ['#e74c3c', '#3498db', '#27ae60', '#f39c12', '#9b59b6', 
-                                '#1abc9c', '#e67e22', '#34495e', '#16a085', '#2c3e50']
+                # Crear gráfico de torta circular visual
+                drawing_torta = Drawing(300, 180)
+                
+                # Centro y radio
+                center_x = 150
+                center_y = 90
+                radius = 70
+                
+                # Colores Chart.js para torta
+                colores_torta = ['#667eea', '#f5576c', '#43e97b', '#fa709a', '#fee140',
+                                '#4facfe', '#00f2fe', '#764ba2', '#a8edea', '#fed6e3']
                 
                 total_inicial = sum(cant for _, cant in usuarios_inicial)
+                angle_start = 0
                 
-                torta_data = [['Inicial', 'Cantidad', '%', '█████████████']]
                 for i, (inicial, cantidad) in enumerate(usuarios_inicial[:10]):
-                    porcentaje = (cantidad / total_inicial) * 100 if total_inicial > 0 else 0
-                    barras = '█' * int(porcentaje / 5)
-                    color = colores_torta[i % len(colores_torta)]
-                    torta_data.append([inicial or '?', str(cantidad), f'{porcentaje:.1f}%', barras])
+                    if total_inicial > 0:
+                        angle_span = (cantidad / total_inicial) * 360
+                        color = colores_torta[i % len(colores_torta)]
+                        
+                        # Crear wedge (sector)
+                        from reportlab.graphics.shapes import Wedge
+                        wedge = Wedge(center_x, center_y, radius, angle_start, angle_start + angle_span - 1, 1)
+                        wedge.fillColor = HexColor(color)
+                        wedge.strokeColor = HexColor('#ffffff')
+                        wedge.strokeWidth = 2
+                        drawing_torta.add(wedge)
+                        
+                        # Etiqueta con leyenda
+                        mid_angle = angle_start + angle_span / 2
+                        label_x = center_x + (radius + 15) * (1 if mid_angle < 180 else -1)
+                        label_y = center_y + (radius + 15) * (0.5 if 90 <= mid_angle <= 270 else -0.5) * (1 if 0 <= mid_angle <= 180 else -1)
+                        
+                        label = String(label_x, label_y, f"{inicial or '?'}: {cantidad}")
+                        label.fontSize = 8
+                        label.fillColor = HexColor(color)
+                        label.fontName = 'Helvetica-Bold'
+                        drawing_torta.add(label)
+                        
+                        angle_start += angle_span
                 
-                torta_table = Table(torta_data, colWidths=[0.8*inch, 0.8*inch, 0.8*inch, 2*inch])
-                torta_styles = [
-                    ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#9b59b6')),
-                    ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
-                    ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-                    ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-                    ('FONTSIZE', (0, 0), (-1, 0), 10),
-                    ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#bdc3c7')),
-                ]
-                
-                for i in range(len(usuarios_inicial[:10])):
-                    color = colores_torta[i % len(colores_torta)]
-                    torta_styles.append(('BACKGROUND', (0, i+1), (-1, i+1), colors.HexColor(color + '20')))
-                
-                torta_table.setStyle(TableStyle(torta_styles))
-                elements.append(torta_table)
-                elements.append(Spacer(1, 10))
+                elements.append(drawing_torta)
+                elements.append(Spacer(1, 15))
 
-            # Gráfico de Dispersión - Datos reales de usuarios
-            elements.append(Paragraph("⚡ GRÁFICO DE DISPERSIÓN - DISTRIBUCIÓN REAL DE USUARIOS", section_style))
+            # ========== GRÁFICO DE DISPERSIÓN TIPO CHART.JS ==========
+            elements.append(Paragraph("⚡ GRÁFICO DE DISPERSIÓN - PUNTOS (ESTILO CHART.JS)", section_style))
             
             with connection.cursor() as cursor:
                 cursor.execute("""
                     SELECT id, LENGTH(nombre) as len_nombre, LENGTH(correo) as len_correo 
                     FROM usuarios 
                     ORDER BY id
-                    LIMIT 15
+                    LIMIT 20
                 """)
                 dispersion_real = cursor.fetchall()
             
-            dispersion_data = [['ID', 'Long. Nombre', 'Long. Correo', 'Zona']]
-            for uid, len_nom, len_correo in dispersion_real:
-                zona = 'A' if len_nom > 8 else ('B' if len_nom > 5 else 'C')
-                dispersion_data.append([str(uid), str(len_nom or 0), str(len_correo or 0), zona])
+            # Crear gráfico de dispersión
+            drawing_disp = Drawing(350, 200)
             
-            dispersion_table = Table(dispersion_data, colWidths=[0.6*inch, 1.2*inch, 1.2*inch, 1*inch])
-            dispersion_styles = [
-                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#e67e22')),
-                ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
-                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-                ('FONTSIZE', (0, 0), (-1, 0), 10),
-                ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#bdc3c7')),
-            ]
+            # Ejes
+            line_x = Line(40, 30, 40, 170)
+            line_x.strokeColor = HexColor('#bdc3c7')
+            drawing_disp.add(line_x)
             
-            for i in range(1, len(dispersion_data)):
-                colors_disp = ['#e74c3c', '#3498db', '#27ae60']
-                color = colors_disp[(i - 1) % 3]
-                dispersion_styles.append(('BACKGROUND', (3, i), (3, i), colors.HexColor(color + '30')))
-                dispersion_styles.append(('TEXTCOLOR', (3, i), (3, i), colors.HexColor(color)))
-                dispersion_styles.append(('FONTNAME', (3, i), (3, i), 'Helvetica-Bold'))
+            line_y = Line(40, 170, 320, 170)
+            line_y.strokeColor = HexColor('#bdc3c7')
+            drawing_disp.add(line_y)
             
-            dispersion_table.setStyle(TableStyle(dispersion_styles))
-            elements.append(dispersion_table)
+            # Labels ejes
+            label_x = String(180, 10, "Longitud Nombre")
+            label_x.fontSize = 9
+            label_x.fillColor = HexColor('#7f8c8d')
+            drawing_disp.add(label_x)
+            
+            label_y = String(15, 100, "L.Correo")
+            label_y.fontSize = 9
+            label_y.fillColor = HexColor('#7f8c8d')
+            drawing_disp.add(label_y)
+            
+            # Puntos de dispersión
+            colores_disp = ['#667eea', '#f5576c', '#43e97b', '#fa709a', '#fee140']
+            for i, (uid, len_nom, len_correo) in enumerate(dispersion_real[:15]):
+                x = 40 + (len_nom or 1) * 8
+                y = 30 + (len_correo or 1) * 3
+                if x > 310: x = 310
+                if y > 165: y = 165
+                
+                circle = Circle(x, y, 6)
+                circle.fillColor = HexColor(colores_disp[i % len(colores_disp)])
+                circle.strokeColor = HexColor('#ffffff')
+                circle.strokeWidth = 1
+                drawing_disp.add(circle)
+                
+                # Label del punto
+                point_label = String(x + 8, y - 3, str(uid))
+                point_label.fontSize = 6
+                point_label.fillColor = HexColor('#2c3e50')
+                drawing_disp.add(point_label)
+            
+            elements.append(drawing_disp)
 
             # Leyenda del gráfico de torta
             elements.append(Paragraph("LEYENDA DE COLORES", section_style))
@@ -397,7 +458,7 @@ def generar_pdf(request, id_usuario):
 def generar_pdf_todos(request):
     """
     Genera PDF con todos los usuarios del sistema.
-    Incluye gráficos de barras y torta a nivel global.
+    Incluye gráficos de barras, torta y dispersión estilo Chart.js.
     """
     with connection.cursor() as cursor:
         cursor.execute("SELECT * FROM usuarios ORDER BY id")
@@ -413,6 +474,13 @@ def generar_pdf_todos(request):
             FROM usuarios GROUP BY DATE_FORMAT(fecha_creacion, '%%Y-%%m') ORDER BY mes
         """)
         usuarios_mes = cursor.fetchall()
+        
+        cursor.execute("""
+            SELECT LEFT(nombre, 1) as inicial, COUNT(*) as cantidad 
+            FROM usuarios WHERE nombre IS NOT NULL
+            GROUP BY LEFT(nombre, 1) ORDER BY cantidad DESC
+        """)
+        usuarios_inicial = cursor.fetchall()
 
     if not usuarios:
         return HttpResponse("No hay usuarios", status=404)
@@ -428,7 +496,7 @@ def generar_pdf_todos(request):
     subtitle_style = ParagraphStyle('SubTitle', parent=styles['Normal'], alignment=1, fontSize=12, textColor=colors.HexColor('#7f8c8d'), spaceAfter=20)
     section_style = ParagraphStyle('SectionTitle', parent=styles['Heading2'], fontSize=14, textColor=colors.HexColor('#3498db'), spaceBefore=15, spaceAfter=10)
 
-    # Logo - solo PNG/JPEG
+    # Logo
     logo_path = os.path.join(settings.BASE_DIR, 'documentos', 'static', 'images', 'logo.png')
     if os.path.exists(logo_path):
         try:
@@ -438,8 +506,27 @@ def generar_pdf_todos(request):
         except Exception as e:
             print(f"Error con logo: {e}")
 
-    elements.append(Paragraph("REPORTE GENERAL DE USUARIOS", title_style))
+    elements.append(Paragraph("📊 REPORTE GENERAL DE USUARIOS CON GRÁFICOS ESTADÍSTICOS", title_style))
     elements.append(Paragraph(f"Fecha: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | Total: {total} usuarios", subtitle_style))
+    
+    # Estadísticas generales
+    elements.append(Paragraph("RESUMEN ESTADÍSTICO", section_style))
+    stats_data = [
+        ['Métrica', 'Valor'],
+        ['Total Usuarios', str(total)],
+        ['Meses con Registros', str(len(usuarios_mes))],
+        ['Letras en Nombres', str(len(usuarios_inicial))],
+    ]
+    stats_table = Table(stats_data, colWidths=[2.5*inch, 1.5*inch])
+    stats_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#27ae60')),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#e8f8f5')),
+        ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#27ae60')),
+    ]))
+    elements.append(stats_table)
 
     # Listado
     elements.append(Paragraph("LISTADO COMPLETO DE USUARIOS", section_style))
@@ -462,25 +549,154 @@ def generar_pdf_todos(request):
     ]))
     elements.append(table)
 
-    # Gráfico de barras
+    # ========== GRÁFICO DE BARRAS ==========
     if usuarios_mes:
-        elements.append(Paragraph("ESTADÍSTICAS - USUARIOS POR MES", section_style))
-        chart_data = [['Mes', 'Cantidad']]
-        for mes, cantidad in usuarios_mes[:12]:
-            chart_data.append([str(mes), cantidad])
+        elements.append(Paragraph("📊 GRÁFICO DE BARRAS - USUARIOS POR MES (ESTILO CHART.JS)", section_style))
         
-        bar_table = Table(chart_data, colWidths=[1.5*inch, 3*inch])
-        bar_table.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#3498db')),
-            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
-            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-            ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#3498db')),
-        ]))
-        elements.append(bar_table)
+        drawing = Drawing(400, 200)
+        max_val = max(cant for _, cant in usuarios_mes) if usuarios_mes else 1
+        bar_width = 25
+        gap = 10
+        start_x = 40
+        start_y = 30
+        
+        # Ejes
+        line = Line(start_x, start_y, start_x, 170)
+        line.strokeColor = HexColor('#bdc3c7')
+        line.strokeWidth = 1
+        drawing.add(line)
+        
+        line2 = Line(start_x, 170, 350, 170)
+        line2.strokeColor = HexColor('#bdc3c7')
+        line2.strokeWidth = 1
+        drawing.add(line2)
+        
+        colores_barras = ['#667eea', '#764ba2', '#f093fb', '#f5576c', '#4facfe', 
+                         '#00f2fe', '#43e97b', '#38f9d7', '#fa709a', '#fee140',
+                         '#a8edea', '#fed6e3']
+        
+        for i, (mes, cantidad) in enumerate(usuarios_mes[:10]):
+            bar_height = (cantidad / max_val) * 120
+            x = start_x + 20 + i * (bar_width + gap)
+            
+            rect = Rect(x, start_y + 10, bar_height, bar_width)
+            rect.fillColor = HexColor(colores_barras[i % len(colores_barras)])
+            rect.strokeColor = HexColor('#ffffff')
+            rect.strokeWidth = 1
+            drawing.add(rect)
+            
+            label = String(x + bar_width/2, 15, str(mes)[-2:] if len(str(mes)) > 2 else str(mes))
+            label.fontSize = 7
+            label.textAnchor = 'middle'
+            label.fillColor = HexColor('#7f8c8d')
+            drawing.add(label)
+            
+            if cantidad > 0:
+                val_label = String(x + bar_width/2, start_y + 15 + bar_height, str(cantidad))
+                val_label.fontSize = 8
+                val_label.textAnchor = 'middle'
+                val_label.fillColor = HexColor('#2c3e50')
+                val_label.fontName = 'Helvetica-Bold'
+                drawing.add(val_label)
+        
+        elements.append(drawing)
+        elements.append(Spacer(1, 15))
+
+    # ========== GRÁFICO DE TORTA ==========
+    if usuarios_inicial:
+        elements.append(Paragraph("🥧 GRÁFICO DE TORTA - DISTRIBUCIÓN POR INICIAL (ESTILO CHART.JS)", section_style))
+        
+        drawing_torta = Drawing(300, 180)
+        center_x = 150
+        center_y = 90
+        radius = 70
+        
+        colores_torta = ['#667eea', '#f5576c', '#43e97b', '#fa709a', '#fee140',
+                        '#4facfe', '#00f2fe', '#764ba2', '#a8edea', '#fed6e3']
+        
+        total_inicial = sum(cant for _, cant in usuarios_inicial)
+        angle_start = 0
+        
+        for i, (inicial, cantidad) in enumerate(usuarios_inicial[:10]):
+            if total_inicial > 0:
+                angle_span = (cantidad / total_inicial) * 360
+                color = colores_torta[i % len(colores_torta)]
+                
+                wedge = Wedge(center_x, center_y, radius, angle_start, angle_start + angle_span - 1, 1)
+                wedge.fillColor = HexColor(color)
+                wedge.strokeColor = HexColor('#ffffff')
+                wedge.strokeWidth = 2
+                drawing_torta.add(wedge)
+                
+                mid_angle = angle_start + angle_span / 2
+                label_x = center_x + (radius + 15) * (1 if mid_angle < 180 else -1)
+                label_y = center_y + (radius + 15) * (0.5 if 90 <= mid_angle <= 270 else -0.5) * (1 if 0 <= mid_angle <= 180 else -1)
+                
+                label = String(label_x, label_y, f"{inicial or '?'}: {cantidad}")
+                label.fontSize = 8
+                label.fillColor = HexColor(color)
+                label.fontName = 'Helvetica-Bold'
+                drawing_torta.add(label)
+                
+                angle_start += angle_span
+        
+        elements.append(drawing_torta)
+        elements.append(Spacer(1, 15))
+
+    # ========== GRÁFICO DE DISPERSIÓN ==========
+    elements.append(Paragraph("⚡ GRÁFICO DE DISPERSIÓN - PUNTOS (ESTILO CHART.JS)", section_style))
+    
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT id, LENGTH(nombre) as len_nombre, LENGTH(correo) as len_correo 
+            FROM usuarios 
+            ORDER BY id
+            LIMIT 20
+        """)
+        dispersion_real = cursor.fetchall()
+    
+    drawing_disp = Drawing(350, 200)
+    
+    line_x = Line(40, 30, 40, 170)
+    line_x.strokeColor = HexColor('#bdc3c7')
+    drawing_disp.add(line_x)
+    
+    line_y = Line(40, 170, 320, 170)
+    line_y.strokeColor = HexColor('#bdc3c7')
+    drawing_disp.add(line_y)
+    
+    label_x = String(180, 10, "Longitud Nombre")
+    label_x.fontSize = 9
+    label_x.fillColor = HexColor('#7f8c8d')
+    drawing_disp.add(label_x)
+    
+    label_y = String(15, 100, "L.Correo")
+    label_y.fontSize = 9
+    label_y.fillColor = HexColor('#7f8c8d')
+    drawing_disp.add(label_y)
+    
+    colores_disp = ['#667eea', '#f5576c', '#43e97b', '#fa709a', '#fee140']
+    for i, (uid, len_nom, len_correo) in enumerate(dispersion_real[:15]):
+        x = 40 + (len_nom or 1) * 8
+        y = 30 + (len_correo or 1) * 3
+        if x > 310: x = 310
+        if y > 165: y = 165
+        
+        circle = Circle(x, y, 6)
+        circle.fillColor = HexColor(colores_disp[i % len(colores_disp)])
+        circle.strokeColor = HexColor('#ffffff')
+        circle.strokeWidth = 1
+        drawing_disp.add(circle)
+        
+        point_label = String(x + 8, y - 3, str(uid))
+        point_label.fontSize = 6
+        point_label.fillColor = HexColor('#2c3e50')
+        drawing_disp.add(point_label)
+    
+    elements.append(drawing_disp)
 
     footer_style = ParagraphStyle('Footer', parent=styles['Normal'], alignment=1, fontSize=10, textColor=colors.HexColor('#95a5a6'), spaceBefore=20)
-    elements.append(Paragraph("Sistema de Generación - Django + MySQL + ReportLab", footer_style))
+    elements.append(Paragraph("Sistema de Generación - Django + MySQL + ReportLab - Gráficos Estilo Chart.js", footer_style))
 
     doc.build(elements)
     return response
